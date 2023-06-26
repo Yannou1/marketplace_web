@@ -177,13 +177,10 @@ nav ul li:nth-child(3) {
     position: absolute; 
     z-index: 1; 
     background-color: black;
-    display: none; 
-  
+    display: none;
 }
 
-.deroule:hover + .div2 {
-  display: block; 
-}
-.menu_img{
-  display: flex;
+
+.show {
+  display: block;
 }
