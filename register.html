@@ -34,7 +34,7 @@
           <span>Cart</span>
         </div>
       </a>
-      <a href="account.html">
+      <a href="#">
         <div class="user-link">
           <img src="logo/account.png" alt="Account">
           <span>Account</span>
@@ -49,14 +49,26 @@
     </div>
   </header>
   <div class="container">
-    <div class="hero-image">
+    <div class="hero-image">    
       <div class="hero-text">
-        <h1>Your online marketplace</h1>
-        <p>Buy, sell, bid the best products online</p>
       </div>
+    
+        <h2>Inscription</h2>
+        <form action="config.php" method="POST">
+            <label for="nom">Nom :</label>
+            <input type="text" name="nom" id="nom" required><br>
+    
+            <label for="email">Email :</label>
+            <input type="email" name="email" id="email" required><br>
+    
+            <label for="passwords">password:</label>
+            <input type="password" name="passwords" id="passwords" required><br>
+    
+            <input type="submit" value="S'inscrire">
+        </form>
+      </div>
+        </div>
     </div>
-    <h2>Welcome to our online sales site</h2>
-    <p>Discover our wide selection of quality products at competitive prices.</p>
   </div>
 </body>
 </html>
