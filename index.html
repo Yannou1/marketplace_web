@@ -8,6 +8,7 @@
   <title>DealStore</title>
 </head>
 <body>
+  <form action="index.php" method="post"></form>
   <header>
     <div class="logo">
       <a href="#"><img src="Logo/logo.png" alt="Logo"></a>
@@ -52,6 +53,15 @@
       <div class="hero-text">
         <h1>Your online marketplace</h1>
         <p>Buy, sell, bid the best products online</p>
+        <div> <form action="script.php" method="post">
+          <label for="nom">Nom :</label>
+          <input type="text" id="nom" name="nom" required>
+  
+          <label for="email">Email :</label>
+          <input type="email" id="email" name="email" required>
+  
+          <input type="submit" value="Envoyer">
+      </form></div>
       </div>
     </div>
     <h2>Welcome to our online sales site</h2>
