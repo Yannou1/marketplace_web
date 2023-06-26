@@ -172,3 +172,18 @@ nav ul li:nth-child(2),
 nav ul li:nth-child(3) {
   margin-left: auto;
 }
+
+.div2 {
+    position: absolute; 
+    z-index: 1; 
+    background-color: black;
+    display: none; 
+  
+}
+
+.deroule:hover + .div2 {
+  display: block; 
+}
+.menu_img{
+  display: flex;
+}
