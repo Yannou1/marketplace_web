@@ -1,0 +1,239 @@
+<?php
+session_start();
+
+// Vérifier si l'utilisateur est déjà connecté
+if (!isset($_SESSION['username'])) {
+  header('Location: account.php');
+  exit;
+}
+
+// Traitement de la déconnexion
+if (isset($_GET['logout'])) {
+  session_destroy();
+  header('Location: account.php');
+  exit;
+}
+
+// Établir la connexion à la base de données
+$host = 'localhost'; // Remplacez par l'adresse de votre serveur de base de données
+$username = 'root'; // Remplacez par votre nom d'utilisateur de base de données
+$password = 'root'; // Remplacez par votre mot de passe de base de données
+$database = 'infinitydb'; // Remplacez par le nom de votre base de données
+
+$connection = mysqli_connect($host, $username, $password, $database);
+
+if (!$connection) {
+  die('Erreur de connexion à la base de données : ' . mysqli_connect_error());
+}
+
+$userId = $_SESSION['user_id'];
+$query = "SELECT * FROM User WHERE user_id = $userId";
+$result = mysqli_query($connection, $query);
+$user = mysqli_fetch_assoc($result);
+
+// Récupérer les commandes de l'utilisateur à partir de la base de données
+$query = "SELECT * FROM orders WHERE user_id = $userId";
+$result = mysqli_query($connection, $query);
+$orders = mysqli_fetch_all($result, MYSQLI_ASSOC);
+
+// Fermer la connexion à la base de données
+mysqli_close($connection);
+?>
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" type="text/css" href="styles.css">
+  <link rel="icon" href="images/test.jpeg" type="image/x-icon">
+
+  <title>INFINITY</title>
+</head>
+<body>
+  <header>
+    <div class="nav-category">
+  <a href="#">
+    <img src="logo/category.png" alt="Category">
+    <span><b>Menu</b></span>
+  </a>
+    <div class="dropdown-menu">
+      <ul>
+        <li class="menu-item">
+          <a href="categories.php">Categories</a>
+          <ul class="sub-menu">
+            <li><a href="categories.php">All categories</a></li>
+            <li><a href="#">Apple product</a></li>
+            <li><a href="#">Cars</a></li>
+            <li><a href="#">Moto</a></li>
+          </ul>
+        </li>
+        <li class="menu-item buy-menu-item">
+          <a href="buy.php">Buy</a>
+          <ul class="sub-menu">
+            <li><a href="#">All</a></li>
+            <li><a href="#">Buy it now</a></li>
+            <li><a href="#">Auction</a></li>
+            <li><a href="#">Best offers</a></li>
+          </ul>
+        </li>
+        <li class="menu-item"><a href="sell.php">Sell</a></li>
+        <!-- Ajoutez autant de choix que nécessaire -->
+      </ul>
+    </div>
+</div>
+
+    <div class="navigation">
+      <a href="buy.php"><img src="logo/buying.png" alt="Buying"><span>Buy</span></a>
+      <a href="sell.php"><img src="logo/sell.png" alt="Sell"><span>Sell</span></a>
+    </div>
+    <div class="logo-site">
+      <a href="index.php"><img class="site-logo" src="logo/logo2.png" alt="Logo"></a>
+    </div>
+    
+    <div class="nav-user">
+      <a href="cart.php">
+        <div class="user-link">
+          <img src="logo/cart.png" alt="Cart">
+          <span><b>Cart</b></span>
+        </div>
+      </a>
+      <a href="profile.php?logout=true">
+        <div class="user-link">
+          <img src="logo/logout.png" alt="Logout">
+          <span><b>Logout</b></span>
+        </div>
+      </a>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="scrolling-text">
+      <span class="message flash-sale">Vente flash</span>
+      <span class="message promo-code">CODE PROMO : SOLDE</span>
+    </div>
+    <div class="profile-page">
+      <div class="menu">
+        <ul>
+          <li><a href="?page=info">Informations</a></li>
+          <li><a href="?page=orders">Mes commandes</a></li>
+        </ul>
+      </div>
+      <div class="content">
+
+       <!-- Afficher les informations de l'utilisateur -->
+<?php
+if (isset($_GET['page']) && $_GET['page'] === 'info') {
+  echo '<h2>Informations</h2>';
+
+  // Vérifier si le formulaire a été soumis
+  if (isset($_POST['submit'])) {
+    // Récupérer les valeurs du formulaire
+    $newUsername = $_POST['username'];
+    $newEmail = $_POST['email'];
+
+    // Mettre à jour les informations de l'utilisateur dans la base de données
+    $updateQuery = "UPDATE User SET username = '$newUsername', email = '$newEmail' WHERE user_id = $userId";
+    echo "New Username: " . $newUsername . "<br>";
+echo "New Email: " . $newEmail . "<br>";
+    $updateResult = mysqli_query($connection, $updateQuery);
+
+    if ($updateResult) {
+      echo '<p class="success-message">Les informations ont été mises à jour avec succès.</p>';
+
+      // Mettre à jour les informations affichées à l'écran
+      $user['username'] = $newUsername;
+      $user['email'] = $newEmail;
+    } else {
+      echo '<p class="error-message">Erreur lors de la mise à jour des informations.</p>';
+    }
+  }
+
+  // Afficher le formulaire avec les informations de l'utilisateur
+  echo '<form method="POST" action="?page=info" class="vertical-form">';
+  echo '<div class="form-group">';
+  echo '<label for="username">Username:</label>';
+  echo '<input type="text" id="username" name="username" value="' . $user['username'] . '">';
+  echo '</div>';
+  echo '<div class="form-group">';
+  echo '<label for="email">Email:</label>';
+  echo '<input type="email" id="email" name="email" value="' . $user['email'] . '">';
+  echo '</div>';
+  echo '<div class="form-group">';
+  echo '<input type="submit" name="submit" value="Enregistrer les modifications">';
+  echo '</div>';
+  echo '</form>';
+}
+
+
+
+
+        /// Afficher les commandes de l'utilisateur
+if (isset($_GET['page']) && $_GET['page'] === 'orders') {
+  echo '<h2>Mes commandes</h2>';
+  if (count($orders) > 0) {
+    echo '<ul>';
+    foreach ($orders as $order) {
+      echo '<li>';
+      echo 'Commande #' . $order['order_id'];
+      echo '<br>';
+      echo 'Quantité: ' . $order['quantity'];
+      echo '<br>';
+      echo 'Date: ' . $order['purchase_date'];
+      echo '<br>';
+      echo 'Statut: ';
+      switch ($order['status']) {
+        case 'l':
+          echo 'En cours';
+          break;
+        case 'f':
+          echo 'Terminé';
+          break;
+        case 'a':
+          echo 'Enchère en cours';
+          break;
+        default:
+          echo 'Inconnu';
+          break;
+      }
+      echo '</li>';
+    }
+    echo '</ul>';
+  } else {
+    echo '<p>Aucune commande trouvée.</p>';
+  }
+}
+
+        ?>
+      </div>
+    </div>
+  </div>
+  <script src="script.js"></script>
+</body>
+<footer>
+  <div class="footer-container">
+    <div class="footer-section">
+      <h4>A propos</h4>
+      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed aliquam nunc ac est condimentum eleifend.</p>
+    </div>
+    <div class="footer-section">
+      <h4>Contact</h4>
+      <p>Email: contact@example.com</p>
+    </div>
+    <div class="footer-section">
+      <h4>Liens utiles</h4>
+      <ul>
+        <li><a href="#">Accueil</a></li>
+        <li><a href="#">Acheter</a></li>
+        <li><a href="#">Vendre</a></li>
+        <li><a href="#">À propos</a></li>
+        <li><a href="#">Contact</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>All rights reserved &copy; 2023 - INFINITY Store</p>
+  </div>
+</footer>
+</html>
