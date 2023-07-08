@@ -2,7 +2,7 @@
 // Inclure le fichier session.php
 include 'session.php';
 // Démarrer la session
-session_start();
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -97,7 +97,7 @@ session_start();
           // Connexion à la base de données
           $servername = "localhost";
           $username = "root";
-          $password = "root";
+          $password = "";
           $dbname = "infinitydb";
 
           $conn = new mysqli($servername, $username, $password, $dbname);
@@ -154,7 +154,7 @@ session_start();
   <?php
   $servername = "localhost";
           $username = "root";
-          $password = "root";
+          $password = "";
           $dbname = "infinitydb";
 
           $conn = new mysqli($servername, $username, $password, $dbname);
@@ -198,7 +198,7 @@ session_start();
   <?php
   $servername = "localhost";
           $username = "root";
-          $password = "root";
+          $password = "";
           $dbname = "infinitydb";
 
           $conn = new mysqli($servername, $username, $password, $dbname);

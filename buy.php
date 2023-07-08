@@ -62,7 +62,21 @@
     </div>
   </header>
   <div class="container">
-    
+
+  <div class="container">
+      <div class="scrolling-text">
+        <span class="message flash-sale">Vente flash</span>
+        <span class="message promo-code">CODE PROMO : SOLDE</span>
+      </div>
+  <div class="category-buttons">
+        <button onclick="showtype('buy_now')">Buy Now</button>
+        <button onclick="showtype('auction')">Auction</button>
+        <button onclick="showtype('best_offer')">best Offer</button>
+      </div>
+
+      <div id="type-items">
+        <?php include 'get_type.php'; ?>
+      </div>      
   </div>
   <script src="script.js"></script>
 </body>

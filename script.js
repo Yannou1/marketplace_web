@@ -99,3 +99,20 @@ function showCategory(category) {
   xmlhttp.open("GET", "get_items.php?category=" + category, true);
   xmlhttp.send();
 }
+
+function showtype(type) {
+  console.log(type)
+  // Envoyer une requête AJAX pour obtenir les produits de la catégorie depuis le serveur
+  var xmlhttp = new XMLHttpRequest();
+  xmlhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+      // Mettre à jour le contenu de la section avec les produits de la catégorie
+      document.getElementById("type-items").innerHTML = this.responseText;
+    }
+  };
+  xmlhttp.open("GET", "get_type.php?type=" + type, true);
+  xmlhttp.send();
+}
+
+
+

@@ -1,6 +1,6 @@
 <?php
 // Récupérer la catégorie à partir de la requête GET
-$category = isset($_GET['category']) ? $_GET['category'] : '';
+$type = isset($_GET['type']) ? $_GET['type'] : '';
 
 // Établir la connexion à la base de données
 $host = 'localhost'; // Remplacez par l'adresse de votre serveur de base de données
@@ -18,11 +18,12 @@ if (!$connection) {
 $sql = "SELECT * FROM Item";
 
 // Vérifier si une catégorie a été spécifiée dans la requête GET
-if (!empty($category) && $category != 'all') {
-    // Récupérer l'ID de catégorie correspondant à partir de la table Category
-    $category = mysqli_real_escape_string($connection, $category);
-    $sql = "SELECT * FROM Item WHERE category_id IN (SELECT category_id FROM Category WHERE name = '$category')";
+if (!empty($type) && $type != 'all') {
+    // Récupérer les éléments correspondants au type spécifié
+    $itemType = mysqli_real_escape_string($connection, $type);
+    $sql = "SELECT * FROM Item WHERE sale_type = '$itemType'";
 }
+
 
 $result = mysqli_query($connection, $sql);
 

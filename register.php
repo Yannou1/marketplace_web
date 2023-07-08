@@ -37,7 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $host = 'localhost'; // L'adresse du serveur de la base de données (par exemple: localhost)
 $dbname = 'infinitydb'; // Le nom de votre base de données
 $username1 = 'root'; // Le nom d'utilisateur de la base de données
-$password1 = 'root';
+$password1 = '';
 
   try {
     // Connexion à la base de données avec PDO
