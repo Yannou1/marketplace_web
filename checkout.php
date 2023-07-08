@@ -1,6 +1,57 @@
 <?php
-// Démarrer la session
 session_start();
+
+// Vérifier si l'utilisateur est connecté
+if (!isset($_SESSION['user_id'])) {
+  // Rediriger vers la page de connexion ou afficher un message d'erreur
+  header("Location: account.php");
+  exit;
+}
+
+// Vérifier si le formulaire est soumis
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+  // Récupérer les valeurs du formulaire
+  $address = $_POST['address'];
+  $paymentMethod = $_POST['payment_method'];
+
+  // Établir la connexion à la base de données
+  $host = 'localhost';
+  $username = 'root';
+  $password = 'root';
+  $database = 'infinitydb';
+
+  $connection = mysqli_connect($host, $username, $password, $database);
+
+  if (!$connection) {
+    die('Erreur de connexion à la base de données : ' . mysqli_connect_error());
+  }
+
+// Mettre à jour les commandes de l'utilisateur dans la base de données
+$userId = $_SESSION['user_id'];
+$sqlUpdate = "UPDATE orders SET status = 'f' WHERE user_id = $userId AND status = 'l'";
+mysqli_query($connection, $sqlUpdate);
+
+// Mettre à jour le stock des articles dans la table "Item" en fonction des commandes de l'utilisateur
+$sqlUpdateStock = "UPDATE Item
+JOIN orders ON Item.item_id = orders.item_id
+SET Item.stock = Item.stock - orders.quantity
+WHERE orders.status = 'f';
+
+";
+
+mysqli_query($connection, $sqlUpdateStock);
+
+
+
+// Fermer la connexion à la base de données
+mysqli_close($connection);
+
+// Rediriger vers une page de confirmation de commande ou afficher un message de succès
+header("Location: order_confirmation.php?success=true");
+exit;
+
+
+}
 ?>
 
 <!DOCTYPE html>
@@ -11,7 +62,7 @@ session_start();
   <link rel="stylesheet" type="text/css" href="styles.css">
   <link rel="icon" href="images/test.jpeg" type="image/x-icon">
 
-  <title>INFINITY</title>
+  <title>INFINITY - Checkout</title>
 </head>
 <body>
   <header>
@@ -82,91 +133,15 @@ session_start();
     </div>
   </header>
   <div class="container">
-    <div class="scrolling-text">
-      <span class="message flash-sale">Vente flash</span>
-      <span class="message promo-code">CODE PROMO : SOLDE</span>
-    </div>
-    <div class="cart">
-      <h2>Cart</h2>
-      <div id="cart-items">
-        <?php
-        // Établir la connexion à la base de données
-        $host = 'localhost'; // Remplacez par l'adresse de votre serveur de base de données
-        $username = 'root'; // Remplacez par votre nom d'utilisateur de base de données
-        $password = 'root'; // Remplacez par votre mot de passe de base de données
-        $database = 'infinitydb'; // Remplacez par le nom de votre base de données
-
-        $connection = mysqli_connect($host, $username, $password, $database);
-
-        if (!$connection) {
-            die('Erreur de connexion à la base de données : ' . mysqli_connect_error());
-        }
-
-        // Récupérer les commandes de l'utilisateur depuis la table orders
-        $userId = $_SESSION['user_id'];// Remplacez par l'ID de l'utilisateur connecté (exemple : 1)
-        $sql = "SELECT * FROM orders WHERE user_id = $userId AND status = 'l'";
-        $result = mysqli_query($connection, $sql);
-
-        // Vérifier s'il y a des résultats
-        if (mysqli_num_rows($result) > 0) {
-            while ($row = mysqli_fetch_assoc($result)) {
-                $orderId = $row['order_id'];
-                $itemId = $row['item_id'];
-
-                // Récupérer les détails de l'article depuis la table Item
-                $sqlItem = "SELECT * FROM Item WHERE item_id = $itemId";
-                $resultItem = mysqli_query($connection, $sqlItem);
-                $rowItem = mysqli_fetch_assoc($resultItem);
-
-                $itemName = $rowItem['name'];
-                $itemPrice = $rowItem['price'];
-                $quantity = $row['quantity'];
-
-                echo '<div class="cart-item-row">';
-                echo '<div class="cart-item-details">';
-                echo '<p>' . $itemName . '</p>';
-                echo '<p>$' . $itemPrice . '</p>';
-                echo '<p>' . $quantity . '</p>';
-                echo '</div>';
-                echo '<a href="delete_order.php?order_id=' . $orderId . '"><img src="logo/trash.png"></a>';
-                echo '</div>';
-
-            }
-        } else {
-            echo '<p>No orders found.</p>';
-        }
-
-       // Calculer le total basé sur les prix des articles avec le statut "l"
-$sqlTotal = "SELECT SUM(Item.price * orders.quantity) AS total 
-             FROM Item 
-             INNER JOIN orders ON Item.item_id = orders.item_id 
-             WHERE orders.user_id = $userId AND orders.status = 'l'";
-$resultTotal = mysqli_query($connection, $sqlTotal);
-$rowTotal = mysqli_fetch_assoc($resultTotal);
-$totalPrice = $rowTotal['total'];
-
-
-        echo '<div class="cart-summary">';
-echo '<div class="cart-summary-details">';
-echo '<div>Total: $' . $totalPrice . '</div>';
-
-// Vérifier s'il y a des orders
-if (mysqli_num_rows($result) > 0) {
-  echo '<div class="checkout-button">';
-  echo '<button onclick="location.href=\'checkout.php\'">Passer la commande</button>';
-  echo '</div>';
-} else {
-  echo '<div class="empty-cart-message">Votre panier est vide.</div>';
-}
-
-echo '</div>';
-echo '</div>';
-
-
-        // Fermer la connexion à la base de données
-        mysqli_close($connection);
-        ?>
-      </div>
+    <h2>Checkout</h2>
+    <div class="checkout-form">
+      <form method="POST" action="">
+        <label for="address">Adresse de livraison:</label>
+        <input type="text" id="address" name="address" required>
+        <label for="payment-method">Moyen de paiement:</label>
+        <input type="text" id="payment-method" name="payment_method" required>
+        <button type="submit">Valider la commande</button>
+      </form>
     </div>
   </div>
   <footer>

@@ -84,6 +84,7 @@ document.addEventListener("DOMContentLoaded", function() {
       xmlhttp.send();
     });
   }
+
 });
 
 function showCategory(category) {
@@ -100,7 +101,26 @@ function showCategory(category) {
   xmlhttp.send();
 }
 
-function showtype(type) {
+function deleteItem(itemId) {
+      // Demander une confirmation avant de supprimer l'item
+      if (confirm("Voulez-vous vraiment supprimer cet item ?")) {
+        // Effectuer la suppression de l'item en utilisant une requête AJAX
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", "delete_item.php", true);
+        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        xhr.onreadystatechange = function () {
+          if (xhr.readyState === 4 && xhr.status === 200) {
+            // Afficher une confirmation de suppression
+            alert("L'item a été supprimé avec succès.");
+
+            // Actualiser la page pour afficher les changements
+            location.reload();
+          }
+        };
+        xhr.send("item_id=" + itemId);
+      }
+    }
+  function showtype(type) {
   console.log(type)
   // Envoyer une requête AJAX pour obtenir les produits de la catégorie depuis le serveur
   var xmlhttp = new XMLHttpRequest();
@@ -113,6 +133,3 @@ function showtype(type) {
   xmlhttp.open("GET", "get_type.php?type=" + type, true);
   xmlhttp.send();
 }
-
-
-

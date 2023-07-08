@@ -2,7 +2,7 @@
 // Inclure le fichier session.php
 include 'session.php';
 // Démarrer la session
-
+session_start();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -97,7 +97,7 @@ include 'session.php';
           // Connexion à la base de données
           $servername = "localhost";
           $username = "root";
-          $password = "";
+          $password = "root";
           $dbname = "infinitydb";
 
           $conn = new mysqli($servername, $username, $password, $dbname);
@@ -154,7 +154,7 @@ include 'session.php';
   <?php
   $servername = "localhost";
           $username = "root";
-          $password = "";
+          $password = "root";
           $dbname = "infinitydb";
 
           $conn = new mysqli($servername, $username, $password, $dbname);
@@ -193,74 +193,11 @@ include 'session.php';
   ?>
 </div>
 
-<div class="user-items-container">
-  <h2>Items vendus par l'utilisateur</h2>
-  <?php
-  $servername = "localhost";
-          $username = "root";
-          $password = "";
-          $dbname = "infinitydb";
-
-          $conn = new mysqli($servername, $username, $password, $dbname);
-          if ($conn->connect_error) {
-            die("Connexion échouée : " . $conn->connect_error);
-          }
-  // Vérifier si l'utilisateur est connecté
-  if (isset($_SESSION['user_id'])) {
-    // Récupérer l'ID de l'utilisateur à partir de la session
-    $user_id = $_SESSION['user_id'];
-
-    // Récupérer les items vendus par l'utilisateur avec le statut "Sold"
-    $sql_sold = "SELECT * FROM Item WHERE user_id = $user_id AND status = 'sold'";
-    $result_sold = $conn->query($sql_sold);
-
-    if ($result_sold->num_rows > 0) {
-      while ($row = $result_sold->fetch_assoc()) {
-        $item_id = $row['item_id'];
-        $item_name = $row['name'];
-        $stock = $row['stock'];
-        $price = $row['price'];
-        $item_status = $row['status'];
-
-        // Afficher les informations de l'item avec le bouton de suppression
-        echo '<div class="user-item">';
-        echo '<span>' . $item_name . '</span>';
-        echo '<span>Stock: ' . $stock . '</span>';
-        echo '<span>Prix: ' . $price . '</span>';
-        echo '<img src="logo/trash.png" alt="Supprimer" class="delete-item-btn" onclick="deleteItem(' . $item_id . ')">';
-        echo '</div>';
-      }
-    } else {
-      echo "Aucun item vendu avec le statut 'Sold'.";
-    }
-  }
-  ?>
-</div>
 
     </div>
   </div>
 
-  <script src="script.js">
-    function deleteItem(itemId) {
-      // Demander une confirmation avant de supprimer l'item
-      if (confirm("Voulez-vous vraiment supprimer cet item ?")) {
-        // Effectuer la suppression de l'item en utilisant une requête AJAX
-        var xhr = new XMLHttpRequest();
-        xhr.open("POST", "delete_item.php", true);
-        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-        xhr.onreadystatechange = function () {
-          if (xhr.readyState === 4 && xhr.status === 200) {
-            // Afficher une confirmation de suppression
-            alert("L'item a été supprimé avec succès.");
-
-            // Actualiser la page pour afficher les changements
-            location.reload();
-          }
-        };
-        xhr.send("item_id=" + itemId);
-      }
-    }
-  </script>
+  <script src="script.js"></script>
 </body>
 <footer>
   <div class="footer-container">

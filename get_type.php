@@ -5,7 +5,7 @@ $type = isset($_GET['type']) ? $_GET['type'] : '';
 // Établir la connexion à la base de données
 $host = 'localhost'; // Remplacez par l'adresse de votre serveur de base de données
 $username = 'root'; // Remplacez par votre nom d'utilisateur de base de données
-$password = ''; // Remplacez par votre mot de passe de base de données
+$password = 'root'; // Remplacez par votre mot de passe de base de données
 $database = 'infinitydb'; // Remplacez par le nom de votre base de données
 
 $connection = mysqli_connect($host, $username, $password, $database);

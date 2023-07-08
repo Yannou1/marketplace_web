@@ -1,7 +1,8 @@
 <?php
 $username = "root";
-$password = "";
+$password = "root";
 $database = "infinitydb";
+$port = 8889;
 $conn = new mysqli('localhost', $username, $password, $database, $port);
 
 // Vérifier la connexion

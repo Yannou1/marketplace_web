@@ -1,7 +1,7 @@
 <?php
-// Inclure le fichier session.php
-include 'session.php';
+$success = isset($_GET['success']) && $_GET['success'] === 'true';
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -82,41 +82,32 @@ include 'session.php';
     </div>
   </header>
   <div class="container">
-    <div class="scrolling-text">
-      <span class="message flash-sale">Vente flash</span>
-      <span class="message promo-code">CODE PROMO : SOLDE</span>
-    </div>
-  <div class="category-buttons">
-        <button onclick="showtype('buy_now')">Buy Now</button>
-        <button onclick="showtype('auction')">Auction</button>
-        <button onclick="showtype('best_offer')">Best Offer</button>
-      </div>
-
-      <div id="type-items">
-        <?php include 'get_type.php'; ?>
-      </div>      
+    <?php if ($success) : ?>
+      <h2>Commande validée avec succès !</h2>
+      <p>Merci pour votre commande.</p>
+    <?php else : ?>
+      <h2>Erreur lors de la validation de la commande</h2>
+      <p>Il y a eu un problème lors de la validation de votre commande. Veuillez réessayer.</p>
+    <?php endif; ?>
   </div>
-  <script src="script.js"></script>
-</body>
-<footer>
+  <footer>
   <div class="footer-container">
     <div class="footer-section">
-      <h4>A propos</h4>
+      <h4>About</h4>
       <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed aliquam nunc ac est condimentum eleifend.</p>
     </div>
     <div class="footer-section">
       <h4>Contact</h4>
       <p>Email: contact@example.com</p>
-      <p>Téléphone: 123-456-7890</p>
     </div>
     <div class="footer-section">
-      <h4>Liens utiles</h4>
+      <h4>Useful links</h4>
       <ul>
-        <li><a href="#">Accueil</a></li>
-        <li><a href="#">Acheter</a></li>
-        <li><a href="#">Vendre</a></li>
-        <li><a href="#">À propos</a></li>
-        <li><a href="#">Contact</a></li>
+        <li><a href="index.php">Accueil</a></li>
+        <li><a href="categories.php">Categories</a></li>
+        <li><a href="buy.php">Buy</a></li>
+        <li><a href="sell.php">Sell</a></li>
+        <li><a href="account.php">Account</a></li>
       </ul>
     </div>
   </div>
@@ -124,5 +115,6 @@ include 'session.php';
     <p>All rights reserved &copy; 2023 - INFINITY Store</p>
   </div>
 </footer>
-
+  <script src="script.js"></script>
+</body>
 </html>
