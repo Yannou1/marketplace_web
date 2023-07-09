@@ -131,7 +131,7 @@ echo '<img src="data:image/jpeg;base64,' . $product_details['photo'] . '" alt="P
     echo '<p>Stock: ' . $product_details['stock'] . '</p>';
 
     // Ajouter le formulaire pour sélectionner la quantité
-    echo '<form action="process_order.php" method="POST">';
+    echo '<form action="process_cart.php" method="POST">';
 echo '<input type="hidden" name="item_id" value="' . $item_id . '">';
 echo '<label for="quantity">Quantity:</label>';
 echo '<input type="number" name="quantity" id="quantity" min="1" max="' . $product_details['stock'] . '" value="1" required>';

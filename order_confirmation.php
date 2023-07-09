@@ -1,6 +1,34 @@
 <?php
 $success = isset($_GET['success']) && $_GET['success'] === 'true';
+
+session_start();
+
+// Vérifier si l'utilisateur est connecté
+if (!isset($_SESSION['user_id'])) {
+  // Rediriger vers la page de connexion ou afficher un message d'erreur
+  header("Location: account.php");
+  exit;
+}
+
+// Établir la connexion à la base de données
+$host = 'localhost';
+$username = 'root';
+$password = 'root';
+$database = 'infinitydb';
+
+$connection = mysqli_connect($host, $username, $password, $database);
+
+if (!$connection) {
+  die('Erreur de connexion à la base de données : ' . mysqli_connect_error());
+}
+
+// Récupérer l'ID de la commande à partir de l'URL
+$orderId = $_GET['order_id'];
+
+// Fermer la connexion à la base de données
+mysqli_close($connection);
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">

@@ -1,6 +1,30 @@
 <?php
 // Démarrer la session
 session_start();
+
+// Vérifier si l'utilisateur est connecté
+if (!isset($_SESSION['user_id'])) {
+  // Rediriger vers la page de connexion si l'utilisateur n'est pas connecté
+  header("Location: login.php");
+  exit();
+}
+
+// Vérifier si l'ID de l'article est fourni dans l'URL et si la méthode de requête est "GET"
+if (isset($_GET['item_id']) && $_SERVER['REQUEST_METHOD'] === 'GET') {
+  $itemId = $_GET['item_id'];
+
+  // Établir la connexion à la base de données
+  $host = 'localhost'; // Remplacez par l'adresse de votre serveur de base de données
+  $username = 'root'; // Remplacez par votre nom d'utilisateur de base de données
+  $password = 'root'; // Remplacez par votre mot de passe de base de données
+  $database = 'infinitydb'; // Remplacez par le nom de votre base de données
+
+  $connection = mysqli_connect($host, $username, $password, $database);
+
+  if (!$connection) {
+    die('Erreur de connexion à la base de données : ' . mysqli_connect_error());
+  }
+}
 ?>
 
 <!DOCTYPE html>
@@ -102,65 +126,75 @@ session_start();
             die('Erreur de connexion à la base de données : ' . mysqli_connect_error());
         }
 
-        // Récupérer les commandes de l'utilisateur depuis la table orders
-        $userId = $_SESSION['user_id'];// Remplacez par l'ID de l'utilisateur connecté (exemple : 1)
-        $sql = "SELECT * FROM orders WHERE user_id = $userId AND status = 'l'";
-        $result = mysqli_query($connection, $sql);
+        // Récupérer les articles dans le panier de l'utilisateur connecté
+$userId = $_SESSION['user_id'];
+$sql = "SELECT Item.*, cart.quantity FROM Item INNER JOIN cart ON Item.item_id = cart.item_id WHERE cart.user_id = $userId AND cart.order_id IS NULL";
+$result = mysqli_query($connection, $sql);
 
-        // Vérifier s'il y a des résultats
-        if (mysqli_num_rows($result) > 0) {
-            while ($row = mysqli_fetch_assoc($result)) {
-                $orderId = $row['order_id'];
-                $itemId = $row['item_id'];
-
-                // Récupérer les détails de l'article depuis la table Item
-                $sqlItem = "SELECT * FROM Item WHERE item_id = $itemId";
-                $resultItem = mysqli_query($connection, $sqlItem);
-                $rowItem = mysqli_fetch_assoc($resultItem);
-
-                $itemName = $rowItem['name'];
-                $itemPrice = $rowItem['price'];
-                $quantity = $row['quantity'];
-
-                echo '<div class="cart-item-row">';
-                echo '<div class="cart-item-details">';
-                echo '<p>' . $itemName . '</p>';
-                echo '<p>$' . $itemPrice . '</p>';
-                echo '<p>' . $quantity . '</p>';
-                echo '</div>';
-                echo '<a href="delete_order.php?order_id=' . $orderId . '"><img src="logo/trash.png"></a>';
-                echo '</div>';
-
-            }
-        } else {
-            echo '<p>No orders found.</p>';
-        }
-
-       // Calculer le total basé sur les prix des articles avec le statut "l"
-$sqlTotal = "SELECT SUM(Item.price * orders.quantity) AS total 
-             FROM Item 
-             INNER JOIN orders ON Item.item_id = orders.item_id 
-             WHERE orders.user_id = $userId AND orders.status = 'l'";
-$resultTotal = mysqli_query($connection, $sqlTotal);
-$rowTotal = mysqli_fetch_assoc($resultTotal);
-$totalPrice = $rowTotal['total'];
-
-
-        echo '<div class="cart-summary">';
-echo '<div class="cart-summary-details">';
-echo '<div>Total: $' . $totalPrice . '</div>';
-
-// Vérifier s'il y a des orders
+// Vérifier s'il y a des résultats
 if (mysqli_num_rows($result) > 0) {
-  echo '<div class="checkout-button">';
-  echo '<button onclick="location.href=\'checkout.php\'">Passer la commande</button>';
-  echo '</div>';
+    // Variable pour stocker le total des prix des articles
+    $totalPrice = 0;
+    // Variable pour stocker le total de la quantité des articles
+    $totalQuantity = 0;
+
+    while ($row = mysqli_fetch_assoc($result)) {
+        $itemId = $row['item_id'];
+        $itemName = $row['name'];
+        $itemPrice = $row['price'];
+        $itemQuantity = $row['quantity'];
+        $itemPhoto = $row['photo'];
+        $itemPhotoEncoded = base64_encode($itemPhoto);
+
+        echo '<div class="cart-item-row">';
+        echo '<div class="cart-item-details">';
+        echo '<img src="data:image/jpeg;base64,' . $itemPhotoEncoded . '" alt="' . $itemName . '" class="small-photo">';
+        echo '<p>' . $itemName . '</p>';
+        echo '<p>$' . $itemPrice . '</p>';
+        echo '<p>' . $itemQuantity . '</p>';
+        echo '</div>';
+        echo '<a href="delete_item_cart.php?item_id=' . $itemId . '"><img src="logo/trash.png"></a>';
+        echo '</div>';
+
+        // Calculer le prix total de cet article
+        $itemTotalPrice = $itemPrice * $itemQuantity;
+        // Ajouter le prix total de cet article au total des prix
+        $totalPrice += $itemTotalPrice;
+        // Ajouter la quantité de cet article au total de la quantité
+        $totalQuantity += $itemQuantity;
+    }
+
+    echo '<div class="cart-summary">';
+    echo '<div class="cart-summary-details">';
+    echo '<div class="cart-total">';
+    echo '<span class="total-label">Total Quantity:</span>';
+    echo '<span class="total-quantity">' . $totalQuantity . '</span>';
+    echo '</div>';
+    echo '<div class="cart-total">';
+    echo '<span class="total-label">Total Price:</span>';
+    echo '<span class="total-quantity">$' . number_format($totalPrice, 2) . '</span>';
+    echo '</div>';
+
+    // Vérifier s'il y a des articles dans le panier
+    if ($totalQuantity > 0) {
+        echo '<div class="checkout-button">';
+        echo '<button onclick="location.href=\'checkout.php\'">Passer la commande</button>';
+        echo '</div>';
+    } else {
+        echo '<div class="empty-cart-message">Votre panier est vide.</div>';
+    }
+
+    echo '</div>';
+    echo '</div>';
 } else {
-  echo '<div class="empty-cart-message">Votre panier est vide.</div>';
+    echo '<p>No items found.</p>';
 }
 
-echo '</div>';
-echo '</div>';
+// Fermer la connexion à la base de données
+mysqli_close($connection);
+
+
+
 
 
         // Fermer la connexion à la base de données

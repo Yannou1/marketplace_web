@@ -75,6 +75,7 @@ mysqli_close($connection);
 ?>
 
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -223,41 +224,51 @@ echo '</div>';
           echo '</div>';
           echo '</form>';
         }
-        // Afficher les commandes de l'utilisateur
-        if (isset($_GET['page']) && $_GET['page'] === 'orders') {
-          echo '<h2>Mes commandes</h2>';
-          if (count($orders) > 0) {
-            echo '<ul>';
-            foreach ($orders as $order) {
-              echo '<li>';
-              echo 'Commande #' . $order['order_id'];
-              echo '<br>';
-              echo 'Quantité: ' . $order['quantity'];
-              echo '<br>';
-              echo 'Date: ' . $order['purchase_date'];
-              echo '<br>';
-              echo 'Statut: ';
-              switch ($order['status']) {
-                case 'l':
-                  echo 'En cours';
-                  break;
-                case 'f':
-                  echo 'Terminé';
-                  break;
-                case 'a':
-                  echo 'Enchère en cours';
-                  break;
-                default:
-                  echo 'Inconnu';
-                  break;
-              }
-              echo '</li>';
-            }
-            echo '</ul>';
-          } else {
-            echo '<p>Aucune commande trouvée.</p>';
-          }
+
+        // Récupérer les commandes de l'utilisateur à partir de la base de données
+if (isset($_GET['page']) && $_GET['page'] === 'orders') {
+  $query = "SELECT * FROM orders WHERE user_id = $userId";
+  $result = mysqli_query($connection, $query);
+  $orders = mysqli_fetch_all($result, MYSQLI_ASSOC);
+
+  if (count($orders) > 0) {
+    echo '<table>';
+    echo '<tr>';
+    echo '<th>Commande</th>';
+    echo '<th>Date</th>';
+    echo '</tr>';
+
+    foreach ($orders as $order) {
+      echo '<tr>';
+      echo '<tr>';
+      echo '<td>Commande #' . $order['order_id'] . '</td>';
+      echo '<td>' . $order['purchase_date'] . '</td>';
+      echo '</tr>';
+
+      // Récupérer les produits associés à cette commande
+      $orderId = $order['order_id'];
+      $cartItems = mysqli_query($connection, "SELECT * FROM cart WHERE order_id = $orderId");
+      if ($cartItems && mysqli_num_rows($cartItems) > 0) {
+        while ($item = mysqli_fetch_assoc($cartItems)) {
+          echo '<tr>';
+          echo '<td>Nom du produit: ' . $item['name'] . '</td>';
+          echo '<td>Prix: ' . $item['price'] . '</td>';
+          echo '</tr>';
         }
+      } else {
+        echo '<tr>';
+        echo '<td colspan="2">Aucun produit trouvé.</td>';
+        echo '</tr>';
+      }
+    }
+
+    echo '</table>';
+  } else {
+    echo '<p>Aucune commande trouvée.</p>';
+  }
+}
+
+
 
         // Afficher la section "Seller" pour les vendeurs
         if (isset($_GET['page']) && $_GET['page'] === 'seller' && $user['role'] === 'seller') {

@@ -900,4 +900,89 @@ input[type="submit"]:hover {
   margin: 20px 0;
 }
 
+.small-photo{
+  width: 150px; /* Remplacez la valeur par la largeur souhaitée */
+  height: auto; /* Permet de conserver le ratio de l'image */
+}
+.checkout-form {
+  background-color: #f7f7f7;
+  padding: 20px;
+  margin-bottom: 20px;
+  text-align: left;
+  border-radius: 5px;
+}
+
+.checkout-form h3 {
+  margin-top: 0;
+  color: #000;
+}
+
+.checkout-form label {
+  display: block;
+  margin-bottom: 10px;
+  color: #000;
+}
+
+.checkout-form input[type="text"],
+.checkout-form select {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  margin-bottom: 10px;
+  color: #000;
+}
+
+.checkout-form button[type="submit"] {
+  background-color: #4CAF50;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  cursor: pointer;
+}
+
+.checkout-form button[type="submit"]:hover {
+  background-color: #45a049;
+}
+.containerA {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+  text-align: center;
+}
+/* Tableau des commandes */
+table {
+  width: 80%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+th, td {
+  padding: 8px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+  color: #000; 
+}
+
+th {
+  background-color: #f2f2f2;
+}
+
+tr {
+  background-color: #f9f9f9;
+}
+
+/* Cellules du tableau à l'intérieur des commandes */
+table table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+table th, table td {
+  padding: 6px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
 
