@@ -12,6 +12,8 @@ session_start();
   <link rel="stylesheet" type="text/css" href="styles.css">
   <link rel="icon" href="images/test.jpeg" type="image/x-icon">
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script> 
   <script src="script.js"></script>
   <title>INFINITY</title>
 </head>
@@ -108,7 +110,7 @@ session_start();
           $item_id = $_GET['itemId'];
 
           // Exécuter la requête SELECT pour récupérer les informations du produit
-          $sql = "SELECT * FROM Item WHERE item_id = $item_id";
+          $sql = "SELECT Item.*, User.username FROM Item INNER JOIN User ON Item.user_id = User.user_id WHERE Item.item_id = $item_id";
           $result = $conn->query($sql);
 
           if ($result->num_rows > 0) {
@@ -119,26 +121,161 @@ session_start();
     'price' => $row['price'],
     'description' => $row['description'],
     'photo' => base64_encode($row['photo']), // Conversion en base64
-    'stock' => $row['stock']
+    'stock' => $row['stock'],
+    'seller' => $row['username'],
+    'user_id' => $row['user_id'],
+    'sale_type' => $row['sale_type']
 );
 
-// Afficher les informations du produit
-echo '<img src="data:image/jpeg;base64,' . $product_details['photo'] . '" alt="Product Image">';
+    if($product_details['sale_type'] == 'buy_now')
+    {
+    // Afficher les informations du produit
+    echo '<img src="data:image/jpeg;base64,' . $product_details['photo'] . '" alt="Product Image">';
+                  echo '<h2>' . $product_details['name'] . '</h2>';
+        echo '<p>' . $product_details['description'] . '</p>';
+        echo '<p>Price: $' . $product_details['price'] . '</p>';
+        
+        echo '<p>Stock: ' . $product_details['stock'] . '</p>';
+        echo '<p>sale_type: ' . $product_details['sale_type'] . '</p>';
 
-              echo '<h2>' . $product_details['name'] . '</h2>';
-    echo '<p>' . $product_details['description'] . '</p>';
-    echo '<p>Price: $' . $product_details['price'] . '</p>';
-    echo '<p>Stock: ' . $product_details['stock'] . '</p>';
+        // Ajouter le formulaire pour sélectionner la quantité
+        echo '<form action="process_cart.php" method="POST">';
+    echo '<input type="hidden" name="item_id" value="' . $item_id . '">';
+    echo '<label for="quantity">Quantity:</label>';
+    echo '<input type="number" name="quantity" id="quantity" min="1" max="' . $product_details['stock'] . '" value="1" required>';
+    echo '<button type="submit" name="buy">Buy</button>';
+    echo '</form>';
+    echo '<p>Sold by: <a href="seller.php?seller_id=' . $product_details['user_id'] . '">' . $product_details['seller'] . '</a></p>';
+        }
+        //Pour les auctions
+        if ($product_details['sale_type'] == 'auction') {
+          // Afficher les informations du produit
+          echo '<img src="data:image/jpeg;base64,' . $product_details['photo'] . '" alt="Product Image">';
+          echo '<h2>' . $product_details['name'] . '</h2>';
+          echo '<p>' . $product_details['description'] . '</p>';
+          echo '<p>Price: $' . $product_details['price'] . '</p>';
+          echo '<p>Sale Type: ' . $product_details['sale_type'] . '</p>';
 
-    // Ajouter le formulaire pour sélectionner la quantité
-    echo '<form action="process_cart.php" method="POST">';
-echo '<input type="hidden" name="item_id" value="' . $item_id . '">';
-echo '<label for="quantity">Quantity:</label>';
-echo '<input type="number" name="quantity" id="quantity" min="1" max="' . $product_details['stock'] . '" value="1" required>';
-echo '<button type="submit" name="buy">Buy</button>';
-echo '</form>';
 
+          $sql = "SELECT auction.minimum_bid, MAX(bid.amount) AS max_bid
+          FROM item
+          LEFT JOIN auction ON item.item_id = auction.item_id
+          LEFT JOIN bid ON item.item_id = bid.item_id
+          WHERE item.item_id = '$item_id' AND item.sale_type = 'auction'";
+  $result = $conn->query($sql);
+  
+  if ($result->num_rows > 0) {
+      $row = $result->fetch_assoc();
+      $minimum_bid_auction = $row['minimum_bid'];
+      $maximum_bid = $row['max_bid'];
+      $minimum_bid = max($minimum_bid_auction, $maximum_bid);
+  } else {
+      // Aucun enregistrement correspondant n'a été trouvé
+      $minimum_bid = 0; // ou une autre valeur par défaut
+  }
+  
+  // Utilisez la valeur de $minimum_bid selon vos besoins
+          // Ajouter le formulaire pour placer une enchère
+          echo '<form action="process_bid.php" method="POST">';
+          echo '<input type="hidden" name="item_id" value="' . $item_id . '">';
+          echo '<p> Minimum bid : '.$minimum_bid .'</p>';
+          echo 'Bid Amount: <input type="number" name="bid_amount" min="' . $minimum_bid . '" required>';
+          echo '<br>';
+          echo '<button type="submit" name="place_bid">Place a Bid</button>';
+          echo '</form>';
+      
+          echo '<p>Sold by: <a href="seller.php?seller_id=' . $product_details['user_id'] . '">' . $product_details['seller'] . '</a></p>';
+
+          echo '<div class="bid-history">';
+          echo '<h3>Bid History</h3>';
+          
+          // Récupérer les informations des enchères passées
+          $sql_history = "SELECT user.username, bid.amount, bid.bid_date FROM bid
+                          INNER JOIN user ON bid.user_id = user.user_id
+                          WHERE bid.item_id = '$item_id'
+                          ORDER BY bid.bid_date DESC";
+          $result_history = $conn->query($sql_history);
+          
+          if ($result_history->num_rows > 0) {
+              $bidHistoryData = array();
+              while ($row_history = $result_history->fetch_assoc()) {
+                  $username = $row_history['username'];
+                  $amount = $row_history['amount'];
+                  $bid_date = $row_history['bid_date'];
+          
+                  // Afficher les informations de chaque enchère passée
+                  $formatted_bid_date = date('M d, Y H:i:s', strtotime($bid_date));
+                  echo '<p><strong>' . $username . '</strong> placed a bid of $' . $amount . ' on ' . $formatted_bid_date . '</p>';
+          
+                  // Ajouter les données de l'enchère à l'historique
+                  $bidHistoryData[] = array(
+                      'username' => $formatted_bid_date,
+                      'amount' => $amount
+                  );
+              }
+          
+              // Convertir les données en format JSON pour le script JavaScript
+              $bidHistoryDataJSON = json_encode($bidHistoryData);
+             
+              // Afficher le graphique des enchères
+              echo '<center>';
+              echo '<canvas id="bid-chart" style="display: block; box-sizing: border-box; height: 130px;"></canvas>';
+              echo '</center>';
+// Ajouter le script JavaScript pour générer le graphique
+         
+          echo '<script>
+              var bidHistoryData = ' . $bidHistoryDataJSON . ';
+
+              var usernames = bidHistoryData.map(function(item) {
+                  return item.username;
+              });
+
+              var amounts = bidHistoryData.map(function(item) {
+                  return item.amount;
+              });
+
+              var ctx = document.getElementById("bid-chart").getContext("2d");
+              new Chart(ctx, {
+                  type: "bar",
+                  data: {
+                      labels: usernames,
+                      datasets: [{
+                          label: "Bid Amount",
+                          data: amounts,
+                          backgroundColor: "rgba(75, 192, 192, 0.8)"
+                      }]
+                  },
+                  options: {
+                      responsive: true,
+                      scales: {
+                          y: {
+                              beginAtZero: true,
+                              ticks: {
+                                  stepSize: 35 // Définissez ici le pas souhaité pour laxe y
+                              }
+                          }
+                      },
+                      plugins: {
+                          legend: {
+                              display: false
+                          }
+                      },
+                      indexAxis: "x",
+                      barPercentage: 0.1
+                  }
+              });
+          </script>';
+          
           } else {
+              echo 'No bid history available.';
+          }
+          
+          echo '</div>';
+          
+      }
+      
+
+      } else {
               echo 'Produit non trouvé.';
           }
 

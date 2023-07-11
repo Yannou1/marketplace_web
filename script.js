@@ -133,3 +133,46 @@ function deleteItem(itemId) {
   xmlhttp.open("GET", "get_type.php?type=" + type, true);
   xmlhttp.send();
 }
+
+document.getElementById('sale_type').addEventListener('change', function() {
+  var selectedValue = this.value;
+  var additionalFields = document.querySelector('.additional-fields');
+  var moovableFields = document.querySelector('.moovable-fields');
+
+  if (selectedValue === 'auction') {
+    additionalFields.style.display = 'block';
+    setFieldsRequired(additionalFields, true);
+    moovableFields.style.display = 'none';
+    setFieldsRequired(moovableFields, false);
+    resetFieldsValues(moovableFields);
+    resetFieldsValidity(moovableFields);
+  } else {
+    additionalFields.style.display = 'none';
+    setFieldsRequired(additionalFields, false);
+    resetFieldsValues(additionalFields);
+    resetFieldsValidity(additionalFields);
+    moovableFields.style.display = 'block';
+    setFieldsRequired(moovableFields, true);
+  }
+});
+
+function setFieldsRequired(container, required) {
+  var fields = container.querySelectorAll('input, select, textarea');
+  fields.forEach(function(field) {
+    field.required = required;
+  });
+}
+
+function resetFieldsValues(container) {
+  var fields = container.querySelectorAll('input, select, textarea');
+  fields.forEach(function(field) {
+    field.value = '';
+  });
+}
+
+function resetFieldsValidity(container) {
+  var fields = container.querySelectorAll('input, select, textarea');
+  fields.forEach(function(field) {
+    field.setCustomValidity('');
+  });
+}

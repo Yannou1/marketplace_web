@@ -135,10 +135,10 @@ include 'session.php';
         <input type="file" name="photo" id="photo" accept="image/*" required>
         <div class = "moovable-fields">
         <label for="price">Prix:</label>
-        <input type="number" name="price" id="price" step="0.01" required>
+        <input type="number" name="price" id="price" step="0.01" >
           <br><br>
         <label for="stock">Stock:</label>
-        <input type="text" name="stock" id="stock" required>
+        <input type="text" name="stock" id="stock" >
         </div>
 
 <!-- Cases supplémentaires pour les enchères -->
@@ -156,98 +156,57 @@ include 'session.php';
     </div>
 
     <div class="user-items-container">
+      <div class="user-items-container">
       <h2>History</h2>
       <div class="user-items-container">
-        <h2>Items mis en vente par l'utilisateur</h2>
-        <?php
-        $servername = "localhost";
-        $username = "root";
-        $password = "root";
-        $dbname = "infinitydb";
+  <h2>Items mis en vente par l'utilisateur</h2>
+  <?php
+  $servername = "localhost";
+          $username = "root";
+          $password = "root";
+          $dbname = "infinitydb";
 
-        $conn = new mysqli($servername, $username, $password, $dbname);
-        if ($conn->connect_error) {
-          die("Connexion échouée : " . $conn->connect_error);
-        }
-        // Vérifier si l'utilisateur est connecté
-        if (isset($_SESSION['user_id'])) {
-          // Récupérer l'ID de l'utilisateur à partir de la session
-          $user_id = $_SESSION['user_id'];
-
-          // Récupérer les items mis en vente par l'utilisateur avec le statut "Progress"
-          $sql_progress = "SELECT * FROM Item WHERE user_id = $user_id AND status = 'progress'";
-          $result_progress = $conn->query($sql_progress);
-
-          if ($result_progress->num_rows > 0) {
-            while ($row = $result_progress->fetch_assoc()) {
-              $item_id = $row['item_id'];
-              $item_name = $row['name'];
-              $stock = $row['stock'];
-              $price = $row['price'];
-              $item_status = $row['status'];
-
-              // Afficher les informations de l'item avec le bouton de suppression
-              echo '<div class="user-item">';
-              echo '<span>' . $item_name . '</span>';
-              echo '<span>Stock: ' . $stock . '</span>';
-              echo '<span>Prix: ' . $price . '</span>';
-              echo '<img src="logo/trash.png" alt="Supprimer" class="delete-item-btn" onclick="deleteItem(' . $item_id . ')">';
-              echo '</div>';
-            }
-          } else {
-            echo "Aucun item vendu avec le statut 'Progress'.";
+          $conn = new mysqli($servername, $username, $password, $dbname);
+          if ($conn->connect_error) {
+            die("Connexion échouée : " . $conn->connect_error);
           }
-        }
-        ?>
-      </div>
+  // Vérifier si l'utilisateur est connecté
+  if (isset($_SESSION['user_id'])) {
+    // Récupérer l'ID de l'utilisateur à partir de la session
+    $user_id = $_SESSION['user_id'];
+
+    // Récupérer les items mis en vente par l'utilisateur avec le statut "Progress"
+    $sql_progress = "SELECT * FROM Item WHERE user_id = $user_id AND status = 'available'";
+    $result_progress = $conn->query($sql_progress);
+
+    if ($result_progress->num_rows > 0) {
+      while ($row = $result_progress->fetch_assoc()) {
+        $item_id = $row['item_id'];
+        $item_name = $row['name'];
+        $stock = $row['stock'];
+        $price = $row['price'];
+        $item_status = $row['status'];
+
+        // Afficher les informations de l'item avec le bouton de suppression
+        echo '<div class="user-item">';
+        echo '<span>' . $item_name . '</span>';
+        echo '<span>Stock: ' . $stock . '</span>';
+        echo '<span>Prix: ' . $price . '</span>';
+        echo '<img src="logo/trash.png" alt="Supprimer" class="delete-item-btn" onclick="deleteItem(' . $item_id . ')">';
+        echo '</div>';
+      }
+    } else {
+      echo "Aucun item vendu avec le statut 'Progress'.";
+    }
+  }
+  ?>
+</div>
 
 
     </div>
   </div>
 
-  <script>
-document.getElementById('sale_type').addEventListener('change', function() {
-  var selectedValue = this.value;
-  var additionalFields = document.querySelector('.additional-fields');
-  var moovableFields = document.querySelector('.moovable-fields');
-
-  if (selectedValue === 'auction') {
-    additionalFields.style.display = 'block';
-    setFieldsRequired(additionalFields, true);
-    moovableFields.style.display = 'none';
-    setFieldsRequired(moovableFields, false);
-    resetFieldsValues(moovableFields);
-    resetFieldsValidity(moovableFields);
-  } else {
-    additionalFields.style.display = 'none';
-    setFieldsRequired(additionalFields, false);
-    resetFieldsValues(additionalFields);
-    resetFieldsValidity(additionalFields);
-    moovableFields.style.display = 'block';
-    setFieldsRequired(moovableFields, true);
-  }
-});
-
-function setFieldsRequired(container, required) {
-  var fields = container.querySelectorAll('input, select, textarea');
-  fields.forEach(function(field) {
-    field.required = required;
-  });
-}
-
-function resetFieldsValues(container) {
-  var fields = container.querySelectorAll('input, select, textarea');
-  fields.forEach(function(field) {
-    field.value = '';
-  });
-}
-
-function resetFieldsValidity(container) {
-  var fields = container.querySelectorAll('input, select, textarea');
-  fields.forEach(function(field) {
-    field.setCustomValidity('');
-  });
-}
+  <script src="script.js">
 </script>
 
 

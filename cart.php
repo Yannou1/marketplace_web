@@ -192,13 +192,6 @@ if (mysqli_num_rows($result) > 0) {
 
 // Fermer la connexion à la base de données
 mysqli_close($connection);
-
-
-
-
-
-        // Fermer la connexion à la base de données
-        mysqli_close($connection);
         ?>
       </div>
     </div>

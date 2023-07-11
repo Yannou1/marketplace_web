@@ -1,4 +1,5 @@
 <?php
+require_once('biblio/tcpdf/tcpdf.php');
 $success = isset($_GET['success']) && $_GET['success'] === 'true';
 
 session_start();
@@ -110,14 +111,23 @@ mysqli_close($connection);
     </div>
   </header>
   <div class="container">
-    <?php if ($success) : ?>
+    <div class="scrolling-text">
+      <span class="message flash-sale">Vente flash</span>
+      <span class="message promo-code">CODE PROMO : SOLDE</span>
+    </div>
+    <div class="thanks">
+      <?php if ($success) : ?>
       <h2>Commande validée avec succès !</h2>
       <p>Merci pour votre commande.</p>
+      <a href="generate_pdf.php?order_id=<?php echo $orderId; ?>" class="download-button">
+        <img src="logo/download.png" alt="Download">
+      </a>
     <?php else : ?>
       <h2>Erreur lors de la validation de la commande</h2>
       <p>Il y a eu un problème lors de la validation de votre commande. Veuillez réessayer.</p>
     <?php endif; ?>
   </div>
+</div>
   <footer>
   <div class="footer-container">
     <div class="footer-section">

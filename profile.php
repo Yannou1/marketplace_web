@@ -75,7 +75,6 @@ mysqli_close($connection);
 ?>
 
 
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -158,10 +157,9 @@ mysqli_close($connection);
             echo '<li><a href="?page=orders">Mes commandes</a></li>';
           } elseif ($user['role'] === 'seller') {
             echo '<li><a href="?page=orders">Mes commandes</a></li>';
-            echo '<li><a href="sell.php">Seller</a></li>';
+            echo '<li><a href="?page=seller">Seller</a></li>';
           } elseif ($user['role'] === 'admin') {
             echo '<li><a href="?page=orders">Mes commandes</a></li>';
-            echo '<li><a href="sell.php">Seller</a></li>';
             echo '<li><a href="?page=admin">Administration</a></li>';
           }
           ?>
@@ -179,6 +177,52 @@ $connection = mysqli_connect($host, $username, $password, $database);
 if (!$connection) {
   die('Erreur de connexion à la base de données : ' . mysqli_connect_error());
 }
+// Afficher la section "Informations" par défaut si le paramètre 'page' n'est pas défini
+if (!isset($_GET['page'])) {
+  echo '<h2>Informations</h2>';
+
+  // Vérifier si le formulaire a été soumis
+  if (isset($_POST['submit'])) {
+    // Récupérer les valeurs du formulaire
+    $newUsername = $_POST['username'];
+    $newEmail = $_POST['email'];
+
+    // Mettre à jour les informations de l'utilisateur dans la base de données
+    $updateQuery = "UPDATE User SET username = '$newUsername', email = '$newEmail' WHERE user_id = $userId";
+    $updateResult = mysqli_query($connection, $updateQuery);
+
+    if ($updateResult) {
+      echo '<p class="success-message">Les informations ont été mises à jour avec succès.</p>';
+
+      // Mettre à jour les informations affichées à l'écran
+      $user['username'] = $newUsername;
+      $user['email'] = $newEmail;
+    } else {
+      echo '<p class="error-message">Erreur lors de la mise à jour des informations.</p>';
+    }
+  }
+
+  // Afficher le formulaire avec les informations de l'utilisateur
+  echo '<form method="POST" action="?page=info" class="vertical-form">';
+  echo '<div class="form-group">';
+  echo '<label for="username">Username:</label>';
+  echo '<input type="text" id="username" name="username" value="' . $user['username'] . '">';
+  echo '</div>';
+  echo '<div class="form-group">';
+  echo '<label for="email">Email:</label>';
+  echo '<input type="email" id="email" name="email" value="' . $user['email'] . '">';
+  echo '</div>';
+  echo '<div class="form-group">';
+  echo '<label for="role">Rôle:</label>';
+  echo '<input type="text" id="role" name="role" value="' . $user['role'] . '" readonly>';
+  echo '</div>';
+
+  echo '<div class="form-group">';
+  echo '<input type="submit" name="submit" value="Enregistrer les modifications">';
+  echo '</div>';
+  echo '</form>';
+}
+
         // Afficher les informations de l'utilisateur
         if (isset($_GET['page']) && $_GET['page'] === 'info') {
           echo '<h2>Informations</h2>';
@@ -225,56 +269,48 @@ echo '</div>';
           echo '</form>';
         }
 
-        // Récupérer les commandes de l'utilisateur à partir de la base de données
-if (isset($_GET['page']) && $_GET['page'] === 'orders') {
-  $query = "SELECT * FROM orders WHERE user_id = $userId";
-  $result = mysqli_query($connection, $query);
-  $orders = mysqli_fetch_all($result, MYSQLI_ASSOC);
+        if (isset($_GET['page']) && $_GET['page'] === 'orders') {
+        foreach ($orders as $order) {
+  echo '<div class="order-container">';
+  echo '<div class="order-id">Commande #' . $order['order_id'] . '</div>';
+  echo '<div class="order-id">Total $' . $order['amount'] . '</div>';
+  echo '<div class="order-date">' . $order['purchase_date'] . '</div>';
+  echo '</div>';
 
-  if (count($orders) > 0) {
-    echo '<table>';
-    echo '<tr>';
-    echo '<th>Commande</th>';
-    echo '<th>Date</th>';
-    echo '</tr>';
+  // Récupérer les produits associés à cette commande
+  $orderId = $order['order_id'];
+  $cartItems = mysqli_query($connection, "SELECT * FROM cart WHERE order_id = $orderId");
+  if ($cartItems && mysqli_num_rows($cartItems) > 0) {
+    echo '<table class="order-table">';
+    while ($item = mysqli_fetch_assoc($cartItems)) {
+      $itemId = $item['item_id'];
+      $itemInfo = mysqli_query($connection, "SELECT * FROM Item WHERE item_id = $itemId");
+      $itemData = mysqli_fetch_assoc($itemInfo);
 
-    foreach ($orders as $order) {
       echo '<tr>';
-      echo '<tr>';
-      echo '<td>Commande #' . $order['order_id'] . '</td>';
-      echo '<td>' . $order['purchase_date'] . '</td>';
+      echo '<td>Nom du produit: ' . $itemData['name'] . '</td>';
+      echo '<td>Prix: ' . $itemData['price'] . '</td>';
       echo '</tr>';
-
-      // Récupérer les produits associés à cette commande
-      $orderId = $order['order_id'];
-      $cartItems = mysqli_query($connection, "SELECT * FROM cart WHERE order_id = $orderId");
-      if ($cartItems && mysqli_num_rows($cartItems) > 0) {
-        while ($item = mysqli_fetch_assoc($cartItems)) {
-          echo '<tr>';
-          echo '<td>Nom du produit: ' . $item['name'] . '</td>';
-          echo '<td>Prix: ' . $item['price'] . '</td>';
-          echo '</tr>';
-        }
-      } else {
-        echo '<tr>';
-        echo '<td colspan="2">Aucun produit trouvé.</td>';
-        echo '</tr>';
-      }
     }
-
     echo '</table>';
   } else {
-    echo '<p>Aucune commande trouvée.</p>';
+    echo '<p>Aucun produit trouvé.</p>';
   }
+}
 }
 
 
 
-        // Afficher la section "Seller" pour les vendeurs
+
         if (isset($_GET['page']) && $_GET['page'] === 'seller' && $user['role'] === 'seller') {
-          echo '<h2>Seller</h2>';
-          // Code HTML spécifique pour la section Seller
-        }
+  echo '<h2>Seller</h2>';
+
+  echo '<div class="seller-options">';
+  echo '<a href="seller.php">Ma page de vendeur</a>';
+  echo '<a href="seller.php?seller_id=' . $user['user_id'] . '">Ma page de vendeur</a>';
+  echo '</div>';
+}
+
 
         // Afficher la section "Administration" pour les administrateurs
         if (isset($_GET['page']) && $_GET['page'] === 'admin'&& $user['role'] === 'admin') {

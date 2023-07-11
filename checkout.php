@@ -73,6 +73,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['payment_form'])) {
   // Récupérer l'ID de la commande depuis l'URL
   $orderId = $_GET['order_id'];
 
+  // Récupérer le total du prix des articles dans le panier
+$totalPrice = 0;
+
+// Requête SQL pour récupérer les articles du panier ayant le même order_id que la commande
+$cartQuery = "SELECT * FROM cart WHERE order_id = $orderId";
+$cartResult = mysqli_query($connection, $cartQuery);
+
+// Vérifier si des articles ont été trouvés dans le panier
+if ($cartResult && mysqli_num_rows($cartResult) > 0) {
+  while ($cartRow = mysqli_fetch_assoc($cartResult)) {
+    $itemId = $cartRow['item_id'];
+    $quantity = $cartRow['quantity'];
+    
+    // Requête SQL pour récupérer le prix de l'article
+    $itemQuery = "SELECT price FROM item WHERE item_id = $itemId";
+    $itemResult = mysqli_query($connection, $itemQuery);
+    
+    // Vérifier si l'article a été trouvé
+    if ($itemResult && mysqli_num_rows($itemResult) > 0) {
+      $itemRow = mysqli_fetch_assoc($itemResult);
+      $price = $itemRow['price'];
+      
+      // Calculer le total du prix de l'article dans le panier
+      $itemTotalPrice = $price * $quantity;
+      
+      // Ajouter le total du prix de l'article au total général
+      $totalPrice += $itemTotalPrice;
+    }
+  }
+}
+
+
   // Mettre à jour la commande avec les informations de paiement et le total price
   $paymentSql = "UPDATE `orders` SET payment_informations = '$paymentInformations', amount = $totalPrice WHERE order_id = $orderId";
   mysqli_query($connection, $paymentSql);
@@ -83,7 +115,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['payment_form'])) {
   mysqli_query($connection, $purchaseDateSql);
 
   // Rediriger vers la page de confirmation de commande
-  header("Location: order_confirmation.php?success=true");
+  header("Location: order_confirmation.php?success=true&order_id=" . $orderId);
   exit;
 }
 
