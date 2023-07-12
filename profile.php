@@ -155,12 +155,15 @@ mysqli_close($connection);
           // Vérifier le rôle de l'utilisateur
           if ($user['role'] === 'customer') {
             echo '<li><a href="?page=orders">Mes commandes</a></li>';
+            echo '<li><a href="?page=auction">Auction</a></li>';
           } elseif ($user['role'] === 'seller') {
             echo '<li><a href="?page=orders">Mes commandes</a></li>';
             echo '<li><a href="?page=seller">Seller</a></li>';
+            echo '<li><a href="?page=auction">Auction</a></li>';
           } elseif ($user['role'] === 'admin') {
             echo '<li><a href="?page=orders">Mes commandes</a></li>';
             echo '<li><a href="?page=admin">Administration</a></li>';
+            echo '<li><a href="?page=auction">Auction</a></li>';
           }
           ?>
         </ul>
@@ -298,7 +301,69 @@ echo '</div>';
   }
 }
 }
+if (isset($_GET['page']) && $_GET['page'] === 'auction') {
+  // Récupérer l'ID de l'utilisateur actuel
+  $userId = $_SESSION['user_id'];
 
+  // Récupérer les enchères "finish" où l'utilisateur est le gagnant
+  $finishBids = mysqli_query($connection, "SELECT * FROM auction WHERE status = 'finish' AND winner_id = $userId");
+
+  // Afficher les enchères "finish" où l'utilisateur est le gagnant
+  if ($finishBids && mysqli_num_rows($finishBids) > 0) {
+      echo '<h2>Enchères terminées remportées par l\'utilisateur :</h2>';
+      echo '<table>';
+      echo '<tr><th>Image</th><th>Numéro d\'article</th><th>Numéro d\'enchère</th><th>Montant</th></tr>';
+      while ($bid = mysqli_fetch_assoc($finishBids)) {
+          $itemId = $bid['item_id'];
+          $itemInfo = mysqli_query($connection, "SELECT * FROM item WHERE item_id = $itemId");
+          $itemData = mysqli_fetch_assoc($itemInfo);
+
+          echo '<tr>';
+          echo '<td><img src="data:image/jpeg;base64,' . base64_encode($itemData['photo']) . '" alt="Image de l\'article" width="100"></td>';
+          echo '<td>' . $itemData['item_id'] . '</td>';
+          echo '<td>' . $bid['auction_id'] . '</td>';
+          echo '<td>' . $bid['highest_bid'] . '</td>';
+          echo '</tr>';
+      }
+      echo '</table>';
+  } else {
+      echo '<p>Aucune enchère "finish" trouvée pour cet utilisateur.</p>';
+  }
+
+  // Récupérer les enchères "ongoing" de l'utilisateur avec le montant maximum
+  $ongoingBids = mysqli_query($connection, "SELECT auction.item_id, auction.auction_id, MAX(user_bid.amount) AS user_max_bid, MAX(auction_bid.amount) AS auction_max_bid
+    FROM auction
+    LEFT JOIN (SELECT item_id, MAX(amount) AS amount FROM bid WHERE user_id = $userId GROUP BY item_id) AS user_bid ON auction.item_id = user_bid.item_id
+    LEFT JOIN (SELECT item_id, MAX(amount) AS amount FROM bid GROUP BY item_id) AS auction_bid ON auction.item_id = auction_bid.item_id
+    WHERE auction.status = 'ongoing' AND auction.item_id IN (SELECT DISTINCT item_id FROM bid WHERE user_id = $userId)
+    GROUP BY auction.item_id");
+
+// Afficher les enchères "ongoing" de l'utilisateur avec les montants maximaux
+if ($ongoingBids && mysqli_num_rows($ongoingBids) > 0) {
+    echo '<h2>Enchères en cours de l\'utilisateur :</h2>';
+    echo '<table>';
+    echo '<tr><th>Image</th><th>Numéro d\'article</th><th>Numéro d\'enchère</th><th>Montant maximal de l\'utilisateur</th><th>Montant maximal de l\'enchère</th></tr>';
+    while ($bid = mysqli_fetch_assoc($ongoingBids)) {
+        $itemId = $bid['item_id'];
+        $itemInfo = mysqli_query($connection, "SELECT * FROM item WHERE item_id = $itemId");
+        $itemData = mysqli_fetch_assoc($itemInfo);
+
+        echo '<tr>';
+        echo '<td><img src="data:image/jpeg;base64,' . base64_encode($itemData['photo']) . '" alt="Image de l\'article" width="100"></td>';
+        echo '<td>' . $itemData['item_id'] . '</td>';
+        echo '<td>' . $bid['auction_id'] . '</td>';
+        echo '<td>' . $bid['user_max_bid'] . '</td>';
+        echo '<td>' . $bid['auction_max_bid'] . '</td>';
+        echo '</tr>';
+    }
+    echo '</table>';
+} else {
+    echo '<p>Aucune enchère "ongoing" trouvée pour cet utilisateur.</p>';
+}
+
+
+
+}
 
 
 

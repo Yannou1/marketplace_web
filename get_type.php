@@ -36,12 +36,13 @@ if (mysqli_num_rows($result) > 0) {
         // Vérifier si l'article est de type "auction"
         if ($saleType === 'auction') {
             // Récupérer le statut de l'enchère depuis la table "auction"
-            $auctionStatusSql = "SELECT status FROM auction WHERE item_id = $itemId";
+            $auctionStatusSql = "SELECT status, end_date FROM auction WHERE item_id = $itemId";
             $auctionStatusResult = mysqli_query($connection, $auctionStatusSql);
 
             if ($auctionStatusResult && mysqli_num_rows($auctionStatusResult) > 0) {
                 $auctionStatusRow = mysqli_fetch_assoc($auctionStatusResult);
                 $auctionStatus = $auctionStatusRow['status'];
+                $endDate = $auctionStatusRow['end_date'];
 
                 // Afficher uniquement les enchères en cours
                 if ($auctionStatus === 'ongoing') {
@@ -49,7 +50,6 @@ if (mysqli_num_rows($result) > 0) {
                     $itemName = $row['name'];
                     $itemPrice = $row['price'];
                     $itemPhoto = $row['photo'];
-                    $endDate = '';
 
                     // Convertir les données binaires en base64
                     $itemPhotoEncoded = base64_encode($itemPhoto);
@@ -59,72 +59,7 @@ if (mysqli_num_rows($result) > 0) {
                     echo '<img src="data:image/jpeg;base64,' . $itemPhotoEncoded . '" alt="Item Photo" class="item-photo">';
                     echo '<p class="item-price">' . $itemPrice . '</p>';
                     echo '<a href="items_details.php?itemId=' . $itemId . '" class="buy-button" data-item-id="' . $itemId . '">Acheter</a>';
-
-                    // Récupérer la date de fin d'enchère de la table "auction"
-                    $auctionEndDateSql = "SELECT end_date FROM auction WHERE item_id = $itemId";
-                    $auctionEndDateResult = mysqli_query($connection, $auctionEndDateSql);
-
-                    if ($auctionEndDateResult && mysqli_num_rows($auctionEndDateResult) > 0) {
-                        $auctionEndDateRow = mysqli_fetch_assoc($auctionEndDateResult);
-                        $endDate = $auctionEndDateRow['end_date'];
-
-                        // Convertir la date de fin en objet DateTime
-                        $endDateTime = new DateTime($endDate);
-
-                        // Date et heure actuelles
-                        $now = new DateTime();
-
-                        // Calculer la différence entre les deux dates
-                        $interval = $now->diff($endDateTime);
-
-                        // Obtenir le temps restant sous forme de jours, heures, minutes et secondes
-                        $remainingDays = $interval->format('%a');
-                        $remainingHours = $interval->format('%h');
-                        $remainingMinutes = $interval->format('%i');
-                        $remainingSeconds = $interval->format('%s');
-
-                        // Afficher le temps restant
-                        echo '<p class="time-remaining" id="time-remaining-' . $itemId . '">';
-                        echo 'Temps restant : ' . $remainingDays . ' jours, ' . $remainingHours . ' heures, ' . $remainingMinutes . ' minutes, ' . $remainingSeconds . ' secondes';
-                        echo '</p>';
-
-                        // JavaScript pour mettre à jour le temps restant à intervalles réguliers
-                        echo '<script>
-                            // Date/heure spécifiée (date de fin de l\'enchère)
-                            var targetDate = new Date("' . $endDate . '");
-
-                            // ID de l\'élément de temps restant correspondant à cet article
-                            var timerId = "time-remaining-' . $itemId . '";
-
-                            // Fonction pour mettre à jour le temps restant
-                            function updateRemainingTime() {
-                                // Date et heure actuelles
-                                var now = new Date();
-
-                                // Calculer la différence entre les deux dates en millisecondes
-                                var diff = targetDate - now;
-
-                                // Calculer les jours, heures, minutes et secondes restants
-                                var days = Math.floor(diff / (1000 * 60 * 60 * 24));
-                                var hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                                var minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-                                var seconds = Math.floor((diff % (1000 * 60)) / 1000);
-
-                                // Construire la chaîne de temps restant
-                                var remainingTimeStr = "Temps restant : " + days + " jours, " + hours + " heures, " + minutes + " minutes, " + seconds + " secondes";
-
-                                // Mettre à jour le contenu de l\'élément de temps restant
-                                document.getElementById(timerId).textContent = remainingTimeStr;
-                            }
-
-                            // Mettre à jour le temps restant initialement
-                            updateRemainingTime();
-
-                            // Mettre à jour le temps restant toutes les secondes
-                            setInterval(updateRemainingTime, 1000);
-                        </script>';
-                    }
-
+                    echo '<p class="item-time-remaining" data-end-date="' . $endDate . '"></p>';
                     echo '</div>';
                 }
             }
@@ -153,3 +88,39 @@ if (mysqli_num_rows($result) > 0) {
 // Fermer la connexion à la base de données
 mysqli_close($connection);
 ?>
+
+<!-- Assurez-vous d'inclure la bibliothèque Moment.js dans votre page -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+
+<script>
+function updateRemainingTime() {
+    var itemTimeElements = document.getElementsByClassName('item-time-remaining');
+
+    for (var i = 0; i < itemTimeElements.length; i++) {
+        var itemTimeElement = itemTimeElements[i];
+        var endDate = itemTimeElement.getAttribute('data-end-date');
+
+        var now = moment();
+        var end = moment(endDate);
+        var duration = moment.duration(end.diff(now));
+
+        var days = Math.floor(duration.asDays());
+        var hours = duration.hours();
+        var minutes = duration.minutes();
+        var seconds = duration.seconds();
+
+        var remainingTime = '';
+
+        if (days > 0) {
+            remainingTime += days + 'J ';
+        }
+
+        remainingTime += hours + 'H ' + minutes + 'M ' + seconds + 'S';
+
+        itemTimeElement.innerHTML = ' <br> Temps restant :<br>' + remainingTime;
+    }
+}
+
+updateRemainingTime();
+setInterval(updateRemainingTime, 1000);
+</script>

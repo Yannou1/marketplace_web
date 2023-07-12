@@ -59,7 +59,7 @@ if (isset($_SESSION['user_id'])) {
       }
       if (isset($_POST['sale_type']) && $_POST['sale_type'] == 'auction') {
         $minimum_bid = $_POST['minimum_bid'];
-        $sql = "INSERT INTO Item (user_id, category_id, name, description, price, sale_type, photo, stock) VALUES ('$user_id', '$category_id', '$name', '$description', '$minimum_bid', '$saleType', '$escapedPhotoContent','$stock')";
+        $sql = "INSERT INTO Item (user_id, category_id, name, description, price, sale_type, photo, stock) VALUES ('$user_id', '$category_id', '$name', '$description', '$minimum_bid', '$saleType', '$escapedPhotoContent','1')";
       }
 
       // Exécuter la requête SQL
@@ -73,7 +73,7 @@ if (isset($_SESSION['user_id'])) {
           $end_date = $_POST['end_date'];
 
           // Ajouter dans la table "auction"
-          $sql_auction = "INSERT INTO auction (item_id, start_date, end_date, seller_id, minimum_bid) VALUES ('$item_id', '$start_date', '$end_date','$seller_id', '$minimum_bid')";
+          $sql_auction = "INSERT INTO auction (item_id, start_date, end_date, seller_id, minimum_bid) VALUES ('$item_id', '$start_date', '$end_date','$user_id', '$minimum_bid')";
           
           // Exécuter la requête
           if ($conn->query($sql_auction) === TRUE) {

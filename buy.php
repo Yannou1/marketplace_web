@@ -87,6 +87,7 @@ include 'session.php';
       <span class="message promo-code">CODE PROMO : SOLDE</span>
     </div>
   <div class="category-buttons">
+  <button onclick="showtype('all')">All</button>
         <button onclick="showtype('buy_now')">Buy Now</button>
         <button onclick="showtype('auction')">Auction</button>
         <button onclick="showtype('best_offer')">Best Offer</button>
