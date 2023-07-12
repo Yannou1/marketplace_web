@@ -1,6 +1,7 @@
 <?php
 session_start();
 include 'session.php';
+
 // Connexion à la base de données
 $servername = "localhost";
 $username = "root";
@@ -54,18 +55,33 @@ if (isset($_SESSION['user_id'])) {
 
       // Préparer la requête SQL pour insérer l'article avec la photo
       if (isset($_POST['sale_type']) && $_POST['sale_type'] == 'buy_now') {
-      $sql = "INSERT INTO Item (user_id, category_id, name, description, price, sale_type, photo, stock) VALUES ('$user_id', '$category_id', '$name', '$description', '$price', '$saleType', '$escapedPhotoContent','$stock')";
+        $sql = "INSERT INTO Item (user_id, category_id, name, description, price, sale_type, photo, stock) VALUES ('$user_id', '$category_id', '$name', '$description', '$price', '$saleType', '$escapedPhotoContent','$stock')";
       }
       if (isset($_POST['sale_type']) && $_POST['sale_type'] == 'auction') {
         $minimum_bid = $_POST['minimum_bid'];
-        $sql = "INSERT INTO Item (user_id, category_id, name, description, price, sale_type, photo, stock) VALUES ('16', '$category_id', '$name', '$description', '$minimum_bid', '$saleType', '$escapedPhotoContent','1')";
+        $sql = "INSERT INTO Item (user_id, category_id, name, description, price, sale_type, photo, stock) VALUES ('$user_id', '$category_id', '$name', '$description', '$minimum_bid', '$saleType', '$escapedPhotoContent','$stock')";
       }
+
       // Exécuter la requête SQL
       if ($conn->query($sql) === TRUE) {
         // L'article a été ajouté avec succès
         echo "L'article a été ajouté avec succès.";
         $item_id = $conn->insert_id;
         
+        if (isset($_POST['sale_type']) && $_POST['sale_type'] == 'auction') {
+          $start_date = $_POST['start_date'];
+          $end_date = $_POST['end_date'];
+
+          // Ajouter dans la table "auction"
+          $sql_auction = "INSERT INTO auction (item_id, start_date, end_date, seller_id, minimum_bid) VALUES ('$item_id', '$start_date', '$end_date','$seller_id', '$minimum_bid')";
+          
+          // Exécuter la requête
+          if ($conn->query($sql_auction) === TRUE) {
+            echo "L'enchère a été ajoutée avec succès.";
+          } else {
+            echo "Erreur : Impossible d'ajouter l'enchère." . $conn->error;
+          }
+        }
       } else {
         // Une erreur s'est produite lors de l'ajout de l'article
         echo "Erreur : Impossible d'ajouter l'article." . $conn->error;
@@ -74,29 +90,12 @@ if (isset($_SESSION['user_id'])) {
       // La photo n'a pas été téléchargée
       echo "Erreur : Veuillez sélectionner une photo.";
     }
-
-      if (isset($_POST['sale_type']) && $_POST['sale_type'] == 'auction') {
-        $start_date = $_POST['start_date'];
-        $end_date = $_POST['end_date'];
-        $minimum_bid = $_POST['minimum_bid'];
-      
-        // Ajouter dans la table "auction"
-        //$sql = "INSERT INTO auction (item_id, start_date, end_date, highest_bid, winner_id, seller_id, minimum_bid) VALUES ('$item_id', '$start_date', '$end_date', null, null, '$user_id', '$minimum_bid')";
-       $sql =  INSERT INTO `bid` (`bid_id`, `item_id`, `user_id`, `amount`, `bid_date`) VALUES (2, 34, 102, '300.00', NULL);
-        // Exécuter les requêtes
-        if ($conn->query($sql) === TRUE ) {
-            echo "Success.";
-        } else {
-            echo "Error: " . $conn->error;
-        }
-    }
-        
-    }
+  }
 }
-
 
 // Fermer la connexion à la base de données
 $conn->close();
+
 // Rediriger vers la page cart.php
 header("Location: sell.php");
 exit;

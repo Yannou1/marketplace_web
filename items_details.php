@@ -1,4 +1,3 @@
-
 <?php
 // Démarrer la session
 session_start();
@@ -155,8 +154,7 @@ session_start();
           echo '<p>' . $product_details['description'] . '</p>';
           echo '<p>Price: $' . $product_details['price'] . '</p>';
           echo '<p>Sale Type: ' . $product_details['sale_type'] . '</p>';
-
-
+            //  $minimum_bid 
           $sql = "SELECT auction.minimum_bid, MAX(bid.amount) AS max_bid
           FROM item
           LEFT JOIN auction ON item.item_id = auction.item_id
@@ -170,12 +168,9 @@ session_start();
       $maximum_bid = $row['max_bid'];
       $minimum_bid = max($minimum_bid_auction, $maximum_bid);
   } else {
-      // Aucun enregistrement correspondant n'a été trouvé
-      $minimum_bid = 0; // ou une autre valeur par défaut
+      $minimum_bid = 0; // default value
   }
-  
-  // Utilisez la valeur de $minimum_bid selon vos besoins
-          // Ajouter le formulaire pour placer une enchère
+         // form to place a bid
           echo '<form action="process_bid.php" method="POST">';
           echo '<input type="hidden" name="item_id" value="' . $item_id . '">';
           echo '<p> Minimum bid : '.$minimum_bid .'</p>';
@@ -188,8 +183,53 @@ session_start();
 
           echo '<div class="bid-history">';
           echo '<h3>Bid History</h3>';
+          //get end hours
+          $sql1 = "SELECT end_date FROM auction WHERE item_id = $item_id";
+          $result_time = $conn->query($sql1);
           
-          // Récupérer les informations des enchères passées
+          if ($result_time->num_rows > 0) {
+              $row1 = $result_time->fetch_assoc();
+              $timer = $row1['end_date'];
+          } else {
+              $timer = null;
+          }
+          
+          // Décompte
+          echo '<h1 id="countdown"></h1>';
+          echo '<script>
+              var targetDate = new Date("' . $timer . '");
+
+              function updateCountdown() {
+                  // Date et heure actuelles
+                  var now = new Date();
+
+                  var diff = targetDate - now;
+          
+                  if (diff <= 0) {
+                      // Arrêter le décompte et afficher "Terminé" ou une autre indication
+                      document.getElementById("countdown").innerHTML = "Terminé";
+                      return;
+                  }
+
+                  // Calculer les jours, heures, minutes et secondes restants
+                  var days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                  var hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                  var minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                  var seconds = Math.floor((diff % (1000 * 60)) / 1000);
+          
+                  // Afficher le décompte
+                  document.getElementById("countdown").innerHTML = days + " days, " + hours + " hours, " + minutes + " minutes, " + seconds + " seconds";
+          
+                  // Mettre à jour le décompte toutes les secondes
+                  setTimeout(updateCountdown, 1000);
+              }
+          
+              // Démarrer le décompte initial
+              if (targetDate) {
+                  updateCountdown();
+              }
+          </script>';
+          //getinfo past bid
           $sql_history = "SELECT user.username, bid.amount, bid.bid_date FROM bid
                           INNER JOIN user ON bid.user_id = user.user_id
                           WHERE bid.item_id = '$item_id'
@@ -203,25 +243,24 @@ session_start();
                   $amount = $row_history['amount'];
                   $bid_date = $row_history['bid_date'];
           
-                  // Afficher les informations de chaque enchère passée
+                  // Info of past bid
                   $formatted_bid_date = date('M d, Y H:i:s', strtotime($bid_date));
                   echo '<p><strong>' . $username . '</strong> placed a bid of $' . $amount . ' on ' . $formatted_bid_date . '</p>';
           
-                  // Ajouter les données de l'enchère à l'historique
+                  // historic adding
                   $bidHistoryData[] = array(
                       'username' => $formatted_bid_date,
                       'amount' => $amount
                   );
               }
           
-              // Convertir les données en format JSON pour le script JavaScript
+              // Format JSON for JavaScript
               $bidHistoryDataJSON = json_encode($bidHistoryData);
-             
-              // Afficher le graphique des enchères
+              // graphic print
               echo '<center>';
               echo '<canvas id="bid-chart" style="display: block; box-sizing: border-box; height: 130px;"></canvas>';
               echo '</center>';
-// Ajouter le script JavaScript pour générer le graphique
+// graphical script
          
           echo '<script>
               var bidHistoryData = ' . $bidHistoryDataJSON . ';

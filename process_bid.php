@@ -29,7 +29,8 @@ if (isset($_POST['place_bid']) && isset($_SESSION['user_id'])) {
 
     // Insérer les informations dans la table "bid"
     $sql = "INSERT INTO bid (user_id, item_id, amount, bid_date) VALUES ('$user_id', '$item_id', '$bid_amount', '$bid_date')";
-    if ($conn->query($sql) === TRUE) {
+    $sql1 = "UPDATE item SET price = '$bid_amount' WHERE item_id = '$item_id'";
+    if (($conn->query($sql) === TRUE) && ($conn->query($sql1) === TRUE)) {
         echo "Item added to bid successfully.";
     } else {
         echo "Error adding item to bid: " . $conn->error;

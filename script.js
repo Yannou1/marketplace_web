@@ -120,6 +120,9 @@ function deleteItem(itemId) {
         xhr.send("item_id=" + itemId);
       }
     }
+
+
+    
   function showtype(type) {
   console.log(type)
   // Envoyer une requête AJAX pour obtenir les produits de la catégorie depuis le serveur
