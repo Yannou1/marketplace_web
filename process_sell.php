@@ -54,7 +54,7 @@ if (isset($_SESSION['user_id'])) {
       }
 
       // Préparer la requête SQL pour insérer l'article avec la photo
-      if (isset($_POST['sale_type']) && $_POST['sale_type'] == 'buy_now') {
+      if (isset($_POST['sale_type']) && $_POST['sale_type'] == 'buy_now' || ($_POST['sale_type']) && $_POST['sale_type'] == 'best_offer') {
         $sql = "INSERT INTO Item (user_id, category_id, name, description, price, sale_type, photo, stock) VALUES ('$user_id', '$category_id', '$name', '$description', '$price', '$saleType', '$escapedPhotoContent','$stock')";
       }
       if (isset($_POST['sale_type']) && $_POST['sale_type'] == 'auction') {

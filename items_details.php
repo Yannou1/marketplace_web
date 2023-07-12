@@ -146,6 +146,31 @@ session_start();
     echo '</form>';
     echo '<p>Sold by: <a href="seller.php?seller_id=' . $product_details['user_id'] . '">' . $product_details['seller'] . '</a></p>';
         }
+
+        if($product_details['sale_type'] == 'best_offer')
+        {
+
+        // Afficher les informations du produit
+        echo '<img src="data:image/jpeg;base64,' . $product_details['photo'] . '" alt="Product Image">';
+                      echo '<h2>' . $product_details['name'] . '</h2>';
+            echo '<p>' . $product_details['description'] . '</p>';
+            echo '<p>Price: $' . $product_details['price'] . '</p>';
+            
+            echo '<p>Stock: ' . $product_details['stock'] . '</p>';
+            echo '<p>sale_type: ' . $product_details['sale_type'] . '</p>';
+    
+            // Ajouter le formulaire pour sélectionner la quantité
+            echo '<form action="process_offer.php" method="POST">';
+        echo '<input type="hidden" name="item_id" value="' . $item_id . '">';
+        echo '<label for="quantity">Quantity:</label>';
+        echo 'Bid Amount: <input type="number" name="offer" min="' . $product_details['price'] . '" required>';
+        echo '<button type="submit" name="buy">Buy</button>';
+        echo '</form>';
+        echo '<p>Sold by: <a href="seller.php?seller_id=' . $product_details['user_id'] . '">' . $product_details['seller'] . '</a></p>';
+          }
+
+
+            
         //Pour les auctions
         if ($product_details['sale_type'] == 'auction') {
           // Afficher les informations du produit

@@ -202,22 +202,15 @@ include 'session.php';
   }
   ?>
 </div>
-
-
     </div>
   </div>
-
   <script src="script.js">
 </script>
-
-
 <style>
   .hidden-fields {
     display: none;
   }
 </style>
-
-
 
 </body>
 <footer>
