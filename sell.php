@@ -145,10 +145,11 @@ include 'session.php';
 <div class="additional-fields" style="display: none;">
   <label for="minimum_bid">Prix minimum des enchères:</label>
   <input type="number" name="minimum_bid" id="minimum_bid">
-  <label for="start_date">Date de début:</label>
-  <input type="date" name="start_date" id="start_date">
-  <label for="end_date">Date de fin:</label>
-  <input type="date" name="end_date" id="end_date">
+  <label for="start_date">Date and Time of Start:</label>
+  <input type="datetime-local" name="start_date" id="start_date">
+  <label for="end_date">Date and Time of End:</label>
+  <input type="datetime-local" name="end_date" id="end_date">
+
 </div>
 
         <button type="submit" name="submit">Déposer</button>
