@@ -156,14 +156,17 @@ mysqli_close($connection);
           if ($user['role'] === 'customer') {
             echo '<li><a href="?page=orders">Mes commandes</a></li>';
             echo '<li><a href="?page=auction">Auction</a></li>';
+            echo '<li><a href="?page=offer">Best Offer</a></li>';
           } elseif ($user['role'] === 'seller') {
             echo '<li><a href="?page=orders">Mes commandes</a></li>';
             echo '<li><a href="?page=seller">Seller</a></li>';
             echo '<li><a href="?page=auction">Auction</a></li>';
+            echo '<li><a href="?page=offer">Best Offer</a></li>';
           } elseif ($user['role'] === 'admin') {
             echo '<li><a href="?page=orders">Mes commandes</a></li>';
             echo '<li><a href="?page=admin">Administration</a></li>';
             echo '<li><a href="?page=auction">Auction</a></li>';
+            echo '<li><a href="?page=offer">Best Offer</a></li>';
           }
           ?>
         </ul>
@@ -292,7 +295,7 @@ echo '</div>';
 
       echo '<tr>';
       echo '<td>Nom du produit: ' . $itemData['name'] . '</td>';
-      echo '<td>Prix: ' . $itemData['price'] . '</td>';
+      echo '<td> Price Offer: ' . $itemData['price'] . '</td>';
       echo '</tr>';
     }
     echo '</table>';
@@ -301,6 +304,73 @@ echo '</div>';
   }
 }
 }
+
+if (isset($_GET['page']) && $_GET['page'] === 'offer') {
+  $offers = mysqli_query($connection, "SELECT * FROM direct_offers");
+
+  echo '<table class="offers-table">';
+
+
+        if (isset($_GET['page']) && $_GET['page'] === 'offer') {
+          $userId = $_SESSION['user_id'];
+        
+          $query = "SELECT do.*, u.username FROM direct_offers do
+                    INNER JOIN User u ON do.seller_id = u.user_id";
+        
+          $offers = mysqli_query($connection, $query);
+        
+          echo '<table class="offers-table">';
+          echo '<tr>
+                  <th>Offre</th>
+                  <th>ID de l\'article</th>
+                  <th>ID de l\'utilisateur</th>
+                  <th>Prix</th>
+                  <th>Horodatage</th>
+                  <th>Statut</th>
+                  <th>Vendeur</th>
+                  <th>Actions</th>
+                </tr>';
+        
+          while ($offer = mysqli_fetch_assoc($offers)) {
+            echo '<tr>';
+            echo '<td>' . $offer['offer_id'] . '</td>';
+            echo '<td>' . $offer['item_id'] . '</td>';
+            echo '<td>' . $offer['user_id'] . '</td>';
+            echo '<td>$' . $offer['price'] . '</td>';
+            echo '<td>' . $offer['timestamp'] . '</td>';
+            echo '<td>' . $offer['status'] . '</td>';
+        
+            if ($offer['seller_id'] == $userId) {
+              echo '<td>' . $offer['username'] . '</td>';
+            } else {
+              echo '<td>Confidentiel</td>';
+            }
+            if ($offer['status'] === 'pending'){
+            echo '<td>
+                    <button onclick="acceptOffer(' . $offer['offer_id'] . ')">Accepter</button>
+                    <button onclick="rejectOffer(' . $offer['offer_id'] . ')">Rejeter</button>
+                    <button onclick="counterOffer(' . $offer['offer_id'] . ')">Contre-offre</button>
+                  </td>';
+            }
+            echo '</tr>';
+            // Récupérer les informations sur l'article associé à l'offre
+            $itemId = $offer['item_id'];
+            $itemInfo = mysqli_query($connection, "SELECT * FROM Item WHERE item_id = $itemId");
+            $itemData = mysqli_fetch_assoc($itemInfo);
+        
+            echo '<tr>';
+            echo '<td colspan="8">
+                    <strong>Informations sur l\'article:</strong>
+                    Nom de l\'article: ' . $itemData['name'] . ', Prix d\'origine: $' . $itemData['price'] . '
+                  </td>';
+            echo '</tr>';
+          }
+        
+          echo '</table>';
+        }
+      }        
+
+
 if (isset($_GET['page']) && $_GET['page'] === 'auction') {
   // Récupérer l'ID de l'utilisateur actuel
   $userId = $_SESSION['user_id'];
