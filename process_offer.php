@@ -1,14 +1,6 @@
 <?php
 include 'session.php';
-$servername = "localhost";
-$username = "root";
-$password = "root";
-$dbname = "infinitydb";
-
-$connection = new mysqli($servername, $username, $password, $dbname);
-if ($connection->connect_error) {
-    die("Connexion échouée : " . $connection->connect_error);
-}
+include 'db_connect.php';
 
 $itemId = $_POST['item_id'];
 $userId = $_SESSION['user_id'];
@@ -38,7 +30,7 @@ $result = mysqli_query($connection, $query);
 
 if ($result) {
     // Succès de l'insertion, rediriger l'utilisateur vers la page de chat avec le vendeur
-    header("Location: http://website/profile.php?page=offer");
+    header("Location: profile.php");
     exit;
 } else {
     // Gestion de l'erreur lors de l'insertion

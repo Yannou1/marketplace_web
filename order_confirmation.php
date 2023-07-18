@@ -2,26 +2,8 @@
 require_once('biblio/tcpdf/tcpdf.php');
 $success = isset($_GET['success']) && $_GET['success'] === 'true';
 
-session_start();
 
-// Vérifier si l'utilisateur est connecté
-if (!isset($_SESSION['user_id'])) {
-  // Rediriger vers la page de connexion ou afficher un message d'erreur
-  header("Location: account.php");
-  exit;
-}
-
-// Établir la connexion à la base de données
-$host = 'localhost';
-$username = 'root';
-$password = 'root';
-$database = 'infinitydb';
-
-$connection = mysqli_connect($host, $username, $password, $database);
-
-if (!$connection) {
-  die('Erreur de connexion à la base de données : ' . mysqli_connect_error());
-}
+include 'db_connect.php';
 
 // Récupérer l'ID de la commande à partir de l'URL
 $orderId = $_GET['order_id'];
@@ -49,30 +31,29 @@ mysqli_close($connection);
     <span><b>Menu</b></span>
   </a>
     <div class="dropdown-menu">
-      <ul>
-        <li class="menu-item">
-          <a href="categories.php">Categories</a>
-          <ul class="sub-menu">
-            <li><a href="categories.php">All categories</a></li>
-            <li><a href="#">Apple product</a></li>
-            <li><a href="#">Cars</a></li>
-            <li><a href="#">Moto</a></li>
-          </ul>
-        </li>
-        <li class="menu-item buy-menu-item">
-          <a href="buy.php">Buy</a>
-          <ul class="sub-menu">
-            <li><a href="#">All</a></li>
-            <li><a href="#">Buy it now</a></li>
-            <li><a href="#">Auction</a></li>
-            <li><a href="#">Best offers</a></li>
-          </ul>
-        </li>
-        <li class="menu-item"><a href="sell.php">Sell</a></li>
-        <!-- Ajoutez autant de choix que nécessaire -->
-      </ul>
+        <ul>
+          <li class="menu-item">
+            <a href="categories.php">Categories</a>
+            <ul class="sub-menu">
+              <li><a href="categories.php">All categories</a></li>
+              <li><a href="categories.php">Car</a></li>
+              <li><a href="categories.php">Moto</a></li>
+              <li><a href="categories.php">Clothing</a></li>
+            </ul>
+          </li>
+          <li class="menu-item buy-menu-item">
+            <a href="buy.php">Buy</a>
+            <ul class="sub-menu">
+              <li><a href="buy.php">All</a></li>
+              <li><a href="buy.php">Buy it now</a></li>
+              <li><a href="buy.php">Auction</a></li>
+              <li><a href="buy.php">Best offers</a></li>
+            </ul>
+          </li>
+          <li class="menu-item"><a href="sell.php">Sell</a></li>
+        </ul>
+      </div>
     </div>
-</div>
 
     <div class="navigation">
       <a href="buy.php"><img src="logo/buying.png" alt="Buying"><span>Buy</span></a>
@@ -81,10 +62,8 @@ mysqli_close($connection);
     <div class="logo-site">
       <a href="index.php"><img class="site-logo" src="logo/logo2.png" alt="Logo"></a>
     </div>
-
     <div class="nav-user">
       <a href="cart.php">
-        
         <div class="user-link">
           <img src="logo/cart.png" alt="Cart">
           <span><b>Cart</b></span>
@@ -112,8 +91,8 @@ mysqli_close($connection);
   </header>
   <div class="container">
     <div class="scrolling-text">
-      <span class="message flash-sale">Vente flash</span>
-      <span class="message promo-code">CODE PROMO : SOLDE</span>
+      <span class="message flash-sale">Flash Message !</span>
+      <span class="message promo-code">New INFINITY Store website</span>
     </div>
     <div class="thanks">
       <?php if ($success) : ?>
@@ -131,21 +110,21 @@ mysqli_close($connection);
   <footer>
   <div class="footer-container">
     <div class="footer-section">
-      <h4>About</h4>
-      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed aliquam nunc ac est condimentum eleifend.</p>
+      <h4>About us</h4>
+      <p>We are 2 students who have invested all our lives in INFINITY Store</p>
     </div>
     <div class="footer-section">
       <h4>Contact</h4>
-      <p>Email: contact@example.com</p>
+      <p>Email : support@infinity.com</p>
+      <p>Phone : 123-456-7890</p>
     </div>
     <div class="footer-section">
       <h4>Useful links</h4>
       <ul>
-        <li><a href="index.php">Accueil</a></li>
+        <li><a href="index.php">Home</a></li>
         <li><a href="categories.php">Categories</a></li>
         <li><a href="buy.php">Buy</a></li>
         <li><a href="sell.php">Sell</a></li>
-        <li><a href="account.php">Account</a></li>
       </ul>
     </div>
   </div>
@@ -153,6 +132,4 @@ mysqli_close($connection);
     <p>All rights reserved &copy; 2023 - INFINITY Store</p>
   </div>
 </footer>
-  <script src="script.js"></script>
-</body>
 </html>

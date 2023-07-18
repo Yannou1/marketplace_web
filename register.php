@@ -1,10 +1,5 @@
 <?php
-session_start();
-// Vérifier si l'utilisateur est déjà connecté
-if (isset($_SESSION['username'])) {
-  header('Location: profile.php');
-  exit;
-}
+include 'session.php';
 
 // Vérifier si le formulaire d'inscription est soumis
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -19,25 +14,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     header('Location: register.php');
     exit;
   }
-
-  // Effectuer d'autres vérifications, par exemple :
-  // - Vérifier si l'utilisateur existe déjà dans la base de données
-  // - Vérifier la validité de l'adresse email
-  // - Hasher le mot de passe avant de le stocker dans la base de données
-  // ...
-
-  // Si les vérifications sont réussies, enregistrer le nouvel utilisateur
-  // Ici, vous devez ajouter le code pour enregistrer l'utilisateur dans votre base de données
-  // par exemple en utilisant des requêtes SQL avec PDO ou MySQLi
-
-  // Exemple d'utilisation de PDO pour enregistrer l'utilisateur
-  // Assurez-vous de configurer correctement votre connexion à la base de données
-
-  // Paramètres de connexion à la base de données
-  $host = 'localhost'; // L'adresse du serveur de la base de données (par exemple: localhost)
-$dbname = 'infinitydb'; // Le nom de votre base de données
-$username1 = 'root'; // Le nom d'utilisateur de la base de données
-$password1 = 'root';
+include 'db_connect.php';
 
   try {
     // Connexion à la base de données avec PDO

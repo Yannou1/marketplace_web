@@ -1043,14 +1043,35 @@ table.seller-table td img {
 
 }
 
-/* CSS pour la photo de profil */
+/* Style pour la photo de profil */
 .profile-photo {
-    width: 150px; /* Modifier la largeur selon vos besoins */
-    height: 150px; /* Modifier la hauteur selon vos besoins */
-    border-radius: 50%; /* Pour créer une forme circulaire */
+    width: 200px;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 50%;
     object-fit: cover; /* Pour s'assurer que l'image remplit complètement le conteneur */
-    margin-bottom: 10px; /* Espacement en bas */
+    margin-bottom: 10px;
 }
+
+/* Style pour le lien "Modifier" */
+.edit-link {
+    display: none;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-1%, -1%);
+    padding: 10px 20px;
+    background-color: #f1f1f1;
+    color: #333;
+    text-decoration: none;
+    font-weight: bold;
+    border-radius: 5px;
+}
+
+.seller:hover .edit-link {
+    display: block;
+}
+
 
 .seller-options {
   display: flex;
@@ -1074,5 +1095,41 @@ table.seller-table td img {
 .profile-page{
   height: 100vh;
 }
+.container{
+  height: 100vh
+}
+
+/* Ajoutez ce style à votre fichier styles.css ou à votre balise <style> dans le code HTML */
+
+.category-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-gap: 20px;
+  margin-top: 20px;
+}
+
+.category-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: #f0f0f0;
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+}
+
+.category-item img {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  margin-bottom: 10px;
+}
+
+.category-item span {
+  font-weight: bold;
+}
+
+
 
 

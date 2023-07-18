@@ -1,24 +1,6 @@
 <?php
-session_start();
-
-// Vérifier si l'utilisateur est connecté
-if (!isset($_SESSION['user_id'])) {
-  // Rediriger vers la page de connexion ou afficher un message d'erreur
-  header("Location: account.php");
-  exit;
-}
-
-// Établir la connexion à la base de données
-$host = 'localhost';
-$username = 'root';
-$password = 'root';
-$database = 'infinitydb';
-
-$connection = mysqli_connect($host, $username, $password, $database);
-
-if (!$connection) {
-  die('Erreur de connexion à la base de données : ' . mysqli_connect_error());
-}
+include 'session.php';
+include 'db_connect.php';
 
 // Récupérer l'ID de l'utilisateur connecté
 $userId = $_SESSION['user_id'];
@@ -114,6 +96,22 @@ if ($cartResult && mysqli_num_rows($cartResult) > 0) {
   $purchaseDateSql = "UPDATE `orders` SET purchase_date = '$purchaseDate' WHERE order_id = $orderId";
   mysqli_query($connection, $purchaseDateSql);
 
+  // Mettre à jour le stock des articles
+  $cartQuery = "SELECT * FROM cart WHERE order_id = $orderId";
+  $cartResult = mysqli_query($connection, $cartQuery);
+
+  // Vérifier si des articles ont été trouvés dans le panier
+  if ($cartResult && mysqli_num_rows($cartResult) > 0) {
+    while ($cartRow = mysqli_fetch_assoc($cartResult)) {
+      $itemId = $cartRow['item_id'];
+      $quantity = $cartRow['quantity'];
+
+      // Mettre à jour le stock de l'article
+      $updateStockQuery = "UPDATE item SET stock = stock - $quantity WHERE item_id = $itemId";
+      mysqli_query($connection, $updateStockQuery);
+    }
+  }
+
   // Rediriger vers la page de confirmation de commande
   header("Location: order_confirmation.php?success=true&order_id=" . $orderId);
   exit;
@@ -124,19 +122,14 @@ mysqli_close($connection);
 ?>
 
 
-
-
-<!-- Code HTML du fichier checkout.php -->
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" type="text/css" href="styles.css">
-  <link rel="icon" href="images/test.jpeg" type="image/x-icon">
 
-  <title>INFINITY - Checkout</title>
+  <title>INFINITY</title>
 </head>
 <body>
   <header>
@@ -146,30 +139,29 @@ mysqli_close($connection);
     <span><b>Menu</b></span>
   </a>
     <div class="dropdown-menu">
-      <ul>
-        <li class="menu-item">
-          <a href="categories.php">Categories</a>
-          <ul class="sub-menu">
-            <li><a href="categories.php">All categories</a></li>
-            <li><a href="#">Apple product</a></li>
-            <li><a href="#">Cars</a></li>
-            <li><a href="#">Moto</a></li>
-          </ul>
-        </li>
-        <li class="menu-item buy-menu-item">
-          <a href="buy.php">Buy</a>
-          <ul class="sub-menu">
-            <li><a href="#">All</a></li>
-            <li><a href="#">Buy it now</a></li>
-            <li><a href="#">Auction</a></li>
-            <li><a href="#">Best offers</a></li>
-          </ul>
-        </li>
-        <li class="menu-item"><a href="sell.php">Sell</a></li>
-        <!-- Ajoutez autant de choix que nécessaire -->
-      </ul>
+        <ul>
+          <li class="menu-item">
+            <a href="categories.php">Categories</a>
+            <ul class="sub-menu">
+              <li><a href="categories.php">All categories</a></li>
+              <li><a href="categories.php">Car</a></li>
+              <li><a href="categories.php">Moto</a></li>
+              <li><a href="categories.php">Clothing</a></li>
+            </ul>
+          </li>
+          <li class="menu-item buy-menu-item">
+            <a href="buy.php">Buy</a>
+            <ul class="sub-menu">
+              <li><a href="buy.php">All</a></li>
+              <li><a href="buy.php">Buy it now</a></li>
+              <li><a href="buy.php">Auction</a></li>
+              <li><a href="buy.php">Best offers</a></li>
+            </ul>
+          </li>
+          <li class="menu-item"><a href="sell.php">Sell</a></li>
+        </ul>
+      </div>
     </div>
-</div>
 
     <div class="navigation">
       <a href="buy.php"><img src="logo/buying.png" alt="Buying"><span>Buy</span></a>
@@ -178,10 +170,8 @@ mysqli_close($connection);
     <div class="logo-site">
       <a href="index.php"><img class="site-logo" src="logo/logo2.png" alt="Logo"></a>
     </div>
-
     <div class="nav-user">
       <a href="cart.php">
-        
         <div class="user-link">
           <img src="logo/cart.png" alt="Cart">
           <span><b>Cart</b></span>
@@ -207,6 +197,11 @@ mysqli_close($connection);
       ?>
     </div>
   </header>
+  <div class="container">
+    <div class="scrolling-text">
+      <span class="message flash-sale">Flash Message !</span>
+      <span class="message promo-code">New INFINITY Store website</span>
+    </div>
   <div class="containerA">
     <h2>Checkout</h2>
     <?php if (isset($_GET['step']) && $_GET['step'] === 'payment') : ?>
@@ -260,24 +255,24 @@ mysqli_close($connection);
       </div>
     <?php endif; ?>
   </div>
-  <footer>
+ <footer>
   <div class="footer-container">
     <div class="footer-section">
-      <h4>About</h4>
-      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed aliquam nunc ac est condimentum eleifend.</p>
+      <h4>About us</h4>
+      <p>We are 2 students who have invested all our lives in INFINITY Store</p>
     </div>
     <div class="footer-section">
       <h4>Contact</h4>
-      <p>Email: contact@example.com</p>
+      <p>Email : support@infinity.com</p>
+      <p>Phone : 123-456-7890</p>
     </div>
     <div class="footer-section">
       <h4>Useful links</h4>
       <ul>
-        <li><a href="index.php">Accueil</a></li>
+        <li><a href="index.php">Home</a></li>
         <li><a href="categories.php">Categories</a></li>
         <li><a href="buy.php">Buy</a></li>
         <li><a href="sell.php">Sell</a></li>
-        <li><a href="account.php">Account</a></li>
       </ul>
     </div>
   </div>
@@ -285,6 +280,4 @@ mysqli_close($connection);
     <p>All rights reserved &copy; 2023 - INFINITY Store</p>
   </div>
 </footer>
-  <script src="script.js"></script>
-</body>
 </html>

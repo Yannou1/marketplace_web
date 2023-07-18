@@ -8,42 +8,40 @@ include 'session.php';
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" type="text/css" href="styles.css">
-  <link rel="icon" href="images/test.jpeg" type="image/x-icon">
 
   <title>INFINITY</title>
 </head>
 <body>
   <header>
     <div class="nav-category">
-  <a href="#">
-    <img src="logo/category.png" alt="Category">
-    <span><b>Menu</b></span>
-  </a>
-    <div class="dropdown-menu">
-      <ul>
-        <li class="menu-item">
-          <a href="categories.php">Categories</a>
-          <ul class="sub-menu">
-            <li><a href="categories.php">All categories</a></li>
-            <li><a href="#">Apple product</a></li>
-            <li><a href="#">Cars</a></li>
-            <li><a href="#">Moto</a></li>
-          </ul>
-        </li>
-        <li class="menu-item buy-menu-item">
-          <a href="buy.php">Buy</a>
-          <ul class="sub-menu">
-            <li><a href="#">All</a></li>
-            <li><a href="#">Buy it now</a></li>
-            <li><a href="#">Auction</a></li>
-            <li><a href="#">Best offers</a></li>
-          </ul>
-        </li>
-        <li class="menu-item"><a href="sell.php">Sell</a></li>
-        <!-- Ajoutez autant de choix que nécessaire -->
-      </ul>
+      <a href="#">
+        <img src="logo/category.png" alt="Category">
+        <span><b>Menu</b></span>
+      </a>
+      <div class="dropdown-menu">
+        <ul>
+          <li class="menu-item">
+            <a href="categories.php">Categories</a>
+            <ul class="sub-menu">
+              <li><a href="categories.php">All categories</a></li>
+              <li><a href="categories.php">Car</a></li>
+              <li><a href="categories.php">Moto</a></li>
+              <li><a href="categories.php">Clothing</a></li>
+            </ul>
+          </li>
+          <li class="menu-item buy-menu-item">
+            <a href="buy.php">Buy</a>
+            <ul class="sub-menu">
+              <li><a href="buy.php">All</a></li>
+              <li><a href="buy.php">Buy it now</a></li>
+              <li><a href="buy.php">Auction</a></li>
+              <li><a href="buy.php">Best offers</a></li>
+            </ul>
+          </li>
+          <li class="menu-item"><a href="sell.php">Sell</a></li>
+        </ul>
+      </div>
     </div>
-</div>
 
     <div class="navigation">
       <a href="buy.php"><img src="logo/buying.png" alt="Buying"><span>Buy</span></a>
@@ -52,10 +50,8 @@ include 'session.php';
     <div class="logo-site">
       <a href="index.php"><img class="site-logo" src="logo/logo2.png" alt="Logo"></a>
     </div>
-
     <div class="nav-user">
       <a href="cart.php">
-        
         <div class="user-link">
           <img src="logo/cart.png" alt="Cart">
           <span><b>Cart</b></span>
@@ -83,41 +79,40 @@ include 'session.php';
   </header>
   <div class="container">
     <div class="scrolling-text">
-      <span class="message flash-sale">Vente flash</span>
-      <span class="message promo-code">CODE PROMO : SOLDE</span>
+      <span class="message flash-sale">Flash Message!</span>
+      <span class="message promo-code">New INFINITY Store website</span>
     </div>
-  <div class="category-buttons">
-  <button onclick="showtype('all')">All</button>
-        <button onclick="showtype('buy_now')">Buy Now</button>
-        <button onclick="showtype('auction')">Auction</button>
-        <button onclick="showtype('best_offer')">Best Offer</button>
-      </div>
+    <div class="category-buttons">
+      <button onclick="showtype('all')">All</button>
+      <button onclick="showtype('buy_now')">Buy Now</button>
+      <button onclick="showtype('auction')">Auction</button>
+      <button onclick="showtype('best_offer')">Best Offer</button>
+    </div>
 
-      <div id="type-items">
-        <?php include 'get_type.php'; ?>
-      </div>      
+    <div id="type-items">
+      <?php include 'get_type.php'; ?>
+    </div>      
   </div>
   <script src="script.js"></script>
 </body>
 <footer>
   <div class="footer-container">
     <div class="footer-section">
-      <h4>A propos</h4>
-      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed aliquam nunc ac est condimentum eleifend.</p>
+      <h4>About us</h4>
+      <p>We are 2 students who have invested all our lives in INFINITY Store</p>
     </div>
     <div class="footer-section">
       <h4>Contact</h4>
-      <p>Email: contact@example.com</p>
-      <p>Téléphone: 123-456-7890</p>
+      <p>Email: support@infinity.com</p>
+      <p>Phone: 123-456-7890</p>
     </div>
     <div class="footer-section">
-      <h4>Liens utiles</h4>
+      <h4>Useful links</h4>
       <ul>
-        <li><a href="#">Accueil</a></li>
-        <li><a href="#">Acheter</a></li>
-        <li><a href="#">Vendre</a></li>
-        <li><a href="#">À propos</a></li>
-        <li><a href="#">Contact</a></li>
+        <li><a href="index.php">Home</a></li>
+        <li><a href="categories.php">Categories</a></li>
+        <li><a href="buy.php">Buy</a></li>
+        <li><a href="sell.php">Sell</a></li>
       </ul>
     </div>
   </div>
@@ -125,5 +120,4 @@ include 'session.php';
     <p>All rights reserved &copy; 2023 - INFINITY Store</p>
   </div>
 </footer>
-
 </html>

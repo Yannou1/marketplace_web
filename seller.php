@@ -1,19 +1,6 @@
 <?php
-$servername = "localhost";
-$username = "root";
-$password = "root";
-$dbname = "infinitydb";
-
-// Créer une connexion
-$connection = mysqli_connect($servername, $username, $password, $dbname);
-
-// Vérifier la connexion
-if (!$connection) {
-    die("Échec de la connexion à la base de données : " . mysqli_connect_error());
-}
-
-// Démarrer la session
-session_start();
+include 'session.php';
+include 'db_connect.php';
 
 // Récupérer l'ID du vendeur à partir du paramètre d'URL
 $sellerId = $_GET['seller_id'];
@@ -34,12 +21,38 @@ if (mysqli_num_rows($result) == 0) {
 // Récupérer les informations du vendeur
 $seller = mysqli_fetch_assoc($result);
 
-// Récupérer tous les produits (items) associés à cet utilisateur
-$query = "SELECT * FROM Item WHERE user_id = $sellerId";
-$result = mysqli_query($connection, $query);
+// Vérifier si l'utilisateur est connecté en tant que vendeur
+$isSeller = (isset($_SESSION['user_id']) && $_SESSION['user_id'] == $sellerId);
 
-if (!$result) {
-    die('Erreur lors de la récupération des produits du vendeur : ' . mysqli_error($connection));
+// Traitement de la modification de la photo de profil
+if ($isSeller && isset($_POST['submit'])) {
+    // Vérifier si une nouvelle photo de profil a été sélectionnée
+    if (isset($_FILES['profile_photo'])) {
+        $file = $_FILES['profile_photo'];
+
+        // Vérifier si le fichier est une image
+        $fileType = exif_imagetype($file['tmp_name']);
+        if ($fileType !== IMAGETYPE_JPEG && $fileType !== IMAGETYPE_PNG) {
+            die('Seules les images au format JPEG et PNG sont autorisées.');
+        }
+
+        // Récupérer le contenu de la photo de profil
+        $profilePhoto = file_get_contents($file['tmp_name']);
+
+        // Mettre à jour la photo de profil dans la base de données
+        $updateQuery = "UPDATE User SET profile_photo = ? WHERE user_id = ?";
+        $statement = mysqli_prepare($connection, $updateQuery);
+        mysqli_stmt_bind_param($statement, 'si', $profilePhoto, $sellerId);
+        $updateResult = mysqli_stmt_execute($statement);
+
+        if ($updateResult) {
+            echo 'La photo de profil a été mise à jour avec succès.';
+            // Actualiser la page pour afficher la nouvelle photo de profil
+            header("Refresh:0");
+        } else {
+            echo 'Erreur lors de la mise à jour de la photo de profil : ' . mysqli_error($connection);
+        }
+    }
 }
 ?>
 
@@ -50,37 +63,36 @@ if (!$result) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" type="text/css" href="styles.css">
     <link rel="icon" href="images/test.jpeg" type="image/x-icon">
-    <title>INFINITY - Seller</title>
+    <title>INFINITY</title>
 </head>
 <body>
-    <header>
+  <header>
     <div class="nav-category">
-      <a href="#">
-        <img src="logo/category.png" alt="Category">
-        <span><b>Menu</b></span>
-      </a>
-      <div class="dropdown-menu">
+  <a href="#">
+    <img src="logo/category.png" alt="Category">
+    <span><b>Menu</b></span>
+  </a>
+    <div class="dropdown-menu">
         <ul>
           <li class="menu-item">
             <a href="categories.php">Categories</a>
             <ul class="sub-menu">
-              <li><a href="categories.php" >All categories</a></li>
-              <li><a href="#">Apple product</a></li>
-              <li><a href="#">Cars</a></li>
-              <li><a href="#">Moto</a></li>
+              <li><a href="categories.php">All categories</a></li>
+              <li><a href="categories.php">Car</a></li>
+              <li><a href="categories.php">Moto</a></li>
+              <li><a href="categories.php">Clothing</a></li>
             </ul>
           </li>
           <li class="menu-item buy-menu-item">
             <a href="buy.php">Buy</a>
             <ul class="sub-menu">
-              <li><a href="#">All</a></li>
-              <li><a href="#">Buy it now</a></li>
-              <li><a href="#">Auction</a></li>
-              <li><a href="#">Best offers</a></li>
+              <li><a href="buy.php">All</a></li>
+              <li><a href="buy.php">Buy it now</a></li>
+              <li><a href="buy.php">Auction</a></li>
+              <li><a href="buy.php">Best offers</a></li>
             </ul>
           </li>
           <li class="menu-item"><a href="sell.php">Sell</a></li>
-          <!-- Ajoutez autant de choix que nécessaire -->
         </ul>
       </div>
     </div>
@@ -92,7 +104,6 @@ if (!$result) {
     <div class="logo-site">
       <a href="index.php"><img class="site-logo" src="logo/logo2.png" alt="Logo"></a>
     </div>
-
     <div class="nav-user">
       <a href="cart.php">
         <div class="user-link">
@@ -120,79 +131,101 @@ if (!$result) {
       ?>
     </div>
   </header>
+  <div class="container">
+    <div class="scrolling-text">
+      <span class="message flash-sale">Flash Message !</span>
+      <span class="message promo-code">New INFINITY Store website</span>
+    </div>
     <div id="page-container">
         <div class="container">
-            <div class="scrolling-text">
-        <span class="message flash-sale">Vente flash</span>
-        <span class="message promo-code">CODE PROMO : SOLDE</span>
-      </div>
             <div class="seller">
-            <?php
-    // Récupérer la photo de profil encodée en base64
-    $profilePhoto = base64_encode($seller['profile_photo']);
-    ?>
-    <img class="profile-photo" src="data:image/jpeg;base64,<?php echo $profilePhoto; ?>" alt="Profile Photo">
+                <h2>Seller: <?php echo $seller['username']; ?></h2>
 
-    
-            <h2>Seller: <?php echo $seller['username']; ?></h2>
-            <!-- Afficher d'autres informations sur le vendeur si nécessaire -->
+                <?php
+                // Afficher la photo de profil
+                if (!empty($seller['profile_photo'])) {
+                    echo '<img class="profile-photo" src="data:image/jpeg;base64,' . base64_encode($seller['profile_photo']) . '" alt="Profile Photo">';
+                } else {
+                    echo '<img class="profile-photo" src="default_profile_photo.jpg" alt="Default Profile Photo">';
+                }
+                ?>
+                <?php
+                // Afficher le formulaire de modification de la photo de profil pour le vendeur
+                if ($isSeller) {
+                    echo '<form action="" method="POST" enctype="multipart/form-data">';
+                    echo '<label for="profile_photo">Change profile picture :</label>';
+                    echo '<input type="file" name="profile_photo" id="profile_photo">';
+                    echo '<input type="submit" name="submit" value="Edit">';
+                    echo '</form>';
+                }
+                ?>
 
-            <h3>Produits du vendeur:</h3>
+                <h3>Seller's products:</h3>
 
+                <table class="seller-table">
+                    <thead>
+                        <tr>
+                            <th>Photo</th>
+                            <th>Name</th>
+                            <th>Description</th>
+                            <th>Price</th>
+                            <th>Type</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php
+                        // Afficher les informations de chaque produit
+                        // Récupérer les informations des produits associés au vendeur
+$itemsQuery = "SELECT * FROM Item WHERE user_id = $sellerId";
+$itemsResult = mysqli_query($connection, $itemsQuery);
 
-            <table class="seller-table">
-                <thead>
-                    <tr>
-                        <th>Photo</th>
-                        <th>Nom</th>
-                        <th>Description</th>
-                        <th>Prix</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php
-                    // Afficher les informations de chaque produit
-                    while ($row = mysqli_fetch_assoc($result)) {
-                        echo '<tr>';
-                        echo '<td><img src="data:image/jpeg;base64,' . base64_encode($row['photo']) . '" alt="Product Image"></td>';
-                        echo '<td>' . $row['name'] . '</td>';
-                        echo '<td>' . $row['description'] . '</td>';
-                        echo '<td>$' . $row['price'] . '</td>';
-                        echo '</tr>';
-                    }
-                    ?>
-                </tbody>
-            </table>
-        </div>
+// Vérifier s'il y a des produits associés au vendeur
+if (mysqli_num_rows($itemsResult) > 0) {
+    // Afficher les informations de chaque produit
+    while ($row = mysqli_fetch_assoc($itemsResult)) {
+        echo '<tr>';
+        echo '<td><img src="data:image/jpeg;base64,' . base64_encode($row['photo']) . '" alt="Product Image"></td>';
+        echo '<td>' . $row['name'] . '</td>';
+        echo '<td>' . $row['description'] . '</td>';
+        echo '<td>$' . $row['price'] . '</td>';
+        echo '<td>' . $row['sale_type'] . '</td>';
+        echo '</tr>';
+    }
+} else {
+    echo '<tr><td colspan="4">No products found.</td></tr>';
+}
 
+                        ?>
+                    </tbody>
+                </table>
+
+            </div>
         </div>
     </div>
-    <script src="script.js"></script>
+
     <footer>
-      <div class="footer-container">
-        <div class="footer-section">
-          <h4>A propos</h4>
-          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed aliquam nunc ac est condimentum eleifend.</p>
-        </div>
-        <div class="footer-section">
-          <h4>Contact</h4>
-          <p>Email: contact@example.com</p>
-          <p>Téléphone: 123-456-7890</p>
-        </div>
-        <div class="footer-section">
-          <h4>Liens utiles</h4>
-          <ul>
-            <li><a href="#">Accueil</a></li>
-            <li><a href="#">Acheter</a></li>
-            <li><a href="#">Vendre</a></li>
-            <li><a href="#">À propos</a></li>
-            <li><a href="#">Contact</a></li>
-          </ul>
-        </div>
-      </div>
-      <div class="footer-bottom">
-        <p>All rights reserved &copy; 2023 - INFINITY Store</p>
-      </div>
-    </footer>
-</body>
+  <div class="footer-container">
+    <div class="footer-section">
+      <h4>About us</h4>
+      <p>We are 2 students who have invested all our lives in INFINITY Store</p>
+    </div>
+    <div class="footer-section">
+      <h4>Contact</h4>
+      <p>Email : support@infinity.com</p>
+      <p>Phone : 123-456-7890</p>
+    </div>
+    <div class="footer-section">
+      <h4>Useful links</h4>
+      <ul>
+        <li><a href="index.php">Home</a></li>
+        <li><a href="categories.php">Categories</a></li>
+        <li><a href="buy.php">Buy</a></li>
+        <li><a href="sell.php">Sell</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>All rights reserved &copy; 2023 - INFINITY Store</p>
+  </div>
+</footer>
 </html>

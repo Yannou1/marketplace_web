@@ -12,7 +12,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
   $password = $_POST['password'];
 
   // Rechercher l'utilisateur dans la base de données en utilisant une requête préparée
-  $stmt = $conn->prepare("SELECT * FROM User WHERE username = ?");
+  $stmt = $connection->prepare("SELECT * FROM User WHERE username = ?");
   $stmt->bind_param("s", $username);
   $stmt->execute();
   $result = $stmt->get_result();
@@ -45,6 +45,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
   // Fermer la connexion à la base de données
   $stmt->close();
-  $conn->close();
+  $connection->close();
 }
 ?>

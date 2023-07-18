@@ -1,17 +1,7 @@
 <?php
 // process_order.php
-session_start();
-
-// Connexion à la base de données
-$servername = "localhost";
-$username = "root";
-$password = "root";
-$dbname = "infinitydb";
-
-$conn = new mysqli($servername, $username, $password, $dbname);
-if ($conn->connect_error) {
-    die("Connexion échouée : " . $conn->connect_error);
-}
+include 'session.php';
+include 'db_connect.php';
 
 // Vérifier si le formulaire a été soumis et si l'utilisateur est connecté
 if (isset($_POST['buy']) && isset($_SESSION['user_id'])) {

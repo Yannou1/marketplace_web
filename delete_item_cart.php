@@ -1,28 +1,10 @@
 <?php
-session_start();
-
-// Vérifier si l'utilisateur est connecté
-if (!isset($_SESSION['user_id'])) {
-  // Rediriger vers la page de connexion si l'utilisateur n'est pas connecté
-  header("Location: login.php");
-  exit();
-}
+include 'session.php';
+include 'db_connect.php';
 
 // Vérifier si l'ID de l'article est fourni dans l'URL
 if (isset($_GET['item_id'])) {
   $itemId = $_GET['item_id'];
-
-  // Établir la connexion à la base de données
-  $host = 'localhost'; // Remplacez par l'adresse de votre serveur de base de données
-  $username = 'root'; // Remplacez par votre nom d'utilisateur de base de données
-  $password = 'root'; // Remplacez par votre mot de passe de base de données
-  $database = 'infinitydb'; // Remplacez par le nom de votre base de données
-
-  $connection = mysqli_connect($host, $username, $password, $database);
-
-  if (!$connection) {
-    die('Erreur de connexion à la base de données : ' . mysqli_connect_error());
-  }
 
   // Supprimer l'article du panier dans la table cart
   $deleteSql = "DELETE FROM cart WHERE item_id = $itemId AND user_id = {$_SESSION['user_id']} AND order_id IS NULL";

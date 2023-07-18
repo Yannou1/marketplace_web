@@ -17,32 +17,31 @@ include 'session.php';
 <body>
   <header>
     <div class="nav-category">
-      <a href="#">
-        <img src="logo/category.png" alt="Category">
-        <span><b>Menu</b></span>
-      </a>
-      <div class="dropdown-menu">
+  <a href="#">
+    <img src="logo/category.png" alt="Category">
+    <span><b>Menu</b></span>
+  </a>
+    <div class="dropdown-menu">
         <ul>
           <li class="menu-item">
             <a href="categories.php">Categories</a>
             <ul class="sub-menu">
               <li><a href="categories.php">All categories</a></li>
-              <li><a href="#">Apple product</a></li>
-              <li><a href="#">Cars</a></li>
-              <li><a href="#">Moto</a></li>
+              <li><a href="categories.php">Car</a></li>
+              <li><a href="categories.php">Moto</a></li>
+              <li><a href="categories.php">Clothing</a></li>
             </ul>
           </li>
           <li class="menu-item buy-menu-item">
             <a href="buy.php">Buy</a>
             <ul class="sub-menu">
-              <li><a href="#">All</a></li>
-              <li><a href="#">Buy it now</a></li>
-              <li><a href="#">Auction</a></li>
-              <li><a href="#">Best offers</a></li>
+              <li><a href="buy.php">All</a></li>
+              <li><a href="buy.php">Buy it now</a></li>
+              <li><a href="buy.php">Auction</a></li>
+              <li><a href="buy.php">Best offers</a></li>
             </ul>
           </li>
           <li class="menu-item"><a href="sell.php">Sell</a></li>
-          <!-- Ajoutez autant de choix que nécessaire -->
         </ul>
       </div>
     </div>
@@ -54,7 +53,6 @@ include 'session.php';
     <div class="logo-site">
       <a href="index.php"><img class="site-logo" src="logo/logo2.png" alt="Logo"></a>
     </div>
-
     <div class="nav-user">
       <a href="cart.php">
         <div class="user-link">
@@ -84,8 +82,8 @@ include 'session.php';
   </header>
   <div class="container">
     <div class="scrolling-text">
-      <span class="message flash-sale">Vente flash</span>
-      <span class="message promo-code">CODE PROMO : SOLDE</span>
+      <span class="message flash-sale">Flash Message !</span>
+      <span class="message promo-code">New INFINITY Store website</span>
     </div>
 
     <div class="sell-form-container">
@@ -95,19 +93,11 @@ include 'session.php';
         <select name="category" id="category" required>
           <?php
           // Connexion à la base de données
-          $servername = "localhost";
-          $username = "root";
-          $password = "root";
-          $dbname = "infinitydb";
-
-          $conn = new mysqli($servername, $username, $password, $dbname);
-          if ($conn->connect_error) {
-            die("Connexion échouée : " . $conn->connect_error);
-          }
+          include 'db_connect.php';
 
           // Récupérer les catégories de la base de données
           $sql = "SELECT * FROM category";
-          $result = $conn->query($sql);
+          $result = $connection->query($sql);
 
           if ($result->num_rows > 0) {
             while ($row = $result->fetch_assoc()) {
@@ -116,7 +106,7 @@ include 'session.php';
           }
 
           // Fermer la connexion à la base de données
-          $conn->close();
+          $connection->close();
           ?>
         </select>
         <label for="sale_type">Type de vente:</label>
@@ -162,15 +152,7 @@ include 'session.php';
       <div class="user-items-container">
   <h2>Items mis en vente par l'utilisateur</h2>
   <?php
-  $servername = "localhost";
-          $username = "root";
-          $password = "root";
-          $dbname = "infinitydb";
-
-          $conn = new mysqli($servername, $username, $password, $dbname);
-          if ($conn->connect_error) {
-            die("Connexion échouée : " . $conn->connect_error);
-          }
+ include 'db_connect.php';
   // Vérifier si l'utilisateur est connecté
   if (isset($_SESSION['user_id'])) {
     // Récupérer l'ID de l'utilisateur à partir de la session
@@ -178,7 +160,7 @@ include 'session.php';
 
     // Récupérer les items mis en vente par l'utilisateur avec le statut "Progress"
     $sql_progress = "SELECT * FROM Item WHERE user_id = $user_id AND status = 'available'";
-    $result_progress = $conn->query($sql_progress);
+    $result_progress = $connection->query($sql_progress);
 
     if ($result_progress->num_rows > 0) {
       while ($row = $result_progress->fetch_assoc()) {
@@ -202,35 +184,42 @@ include 'session.php';
   }
   ?>
 </div>
+
+
     </div>
   </div>
+
   <script src="script.js">
 </script>
+
+
 <style>
   .hidden-fields {
     display: none;
   }
 </style>
 
+
+
 </body>
 <footer>
   <div class="footer-container">
     <div class="footer-section">
-      <h4>About</h4>
-      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed aliquam nunc ac est condimentum eleifend.</p>
+      <h4>About us</h4>
+      <p>We are 2 students who have invested all our lives in INFINITY Store</p>
     </div>
     <div class="footer-section">
       <h4>Contact</h4>
-      <p>Email: contact@example.com</p>
+      <p>Email : support@infinity.com</p>
+      <p>Phone : 123-456-7890</p>
     </div>
     <div class="footer-section">
       <h4>Useful links</h4>
       <ul>
-        <li><a href="index.php">Accueil</a></li>
+        <li><a href="index.php">Home</a></li>
         <li><a href="categories.php">Categories</a></li>
         <li><a href="buy.php">Buy</a></li>
         <li><a href="sell.php">Sell</a></li>
-        <li><a href="account.php">Account</a></li>
       </ul>
     </div>
   </div>
@@ -238,5 +227,5 @@ include 'session.php';
     <p>All rights reserved &copy; 2023 - INFINITY Store</p>
   </div>
 </footer>
-
 </html>
+

@@ -6,16 +6,7 @@ require_once('biblio/tcpdf/tcpdf.php');
 $orderId = $_GET['order_id'];
 
 // Établir la connexion à la base de données
-$host = 'localhost';
-$username = 'root';
-$password = 'root';
-$database = 'infinitydb';
-
-$connection = mysqli_connect($host, $username, $password, $database);
-
-if (!$connection) {
-  die('Erreur de connexion à la base de données : ' . mysqli_connect_error());
-}
+include 'db_connect.php';
 
 // Récupérer les informations de la commande à partir de la base de données
 $orderQuery = "SELECT * FROM orders WHERE order_id = $orderId";

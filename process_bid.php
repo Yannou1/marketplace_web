@@ -1,17 +1,6 @@
 <?php
-// process_order.php
-session_start();
-
-// Connexion à la base de données
-$servername = "localhost";
-$username = "root";
-$password = "root";
-$dbname = "infinitydb";
-
-$conn = new mysqli($servername, $username, $password, $dbname);
-if ($conn->connect_error) {
-    die("Connexion échouée : " . $conn->connect_error);
-}
+include 'session.php';
+include 'db_connect.php';
 
 if (isset($_POST['place_bid']) && isset($_SESSION['user_id'])) {
     // Récupérer les valeurs du formulaire
@@ -30,14 +19,14 @@ if (isset($_POST['place_bid']) && isset($_SESSION['user_id'])) {
     // Insérer les informations dans la table "bid"
     $sql = "INSERT INTO bid (user_id, item_id, amount, bid_date) VALUES ('$user_id', '$item_id', '$bid_amount', '$bid_date')";
     $sql1 = "UPDATE item SET price = '$bid_amount' WHERE item_id = '$item_id'";
-    if (($conn->query($sql) === TRUE) && ($conn->query($sql1) === TRUE)) {
+    if (($connection->query($sql) === TRUE) && ($connection->query($sql1) === TRUE)) {
         echo "Item added to bid successfully.";
     } else {
-        echo "Error adding item to bid: " . $conn->error;
+        echo "Error adding item to bid: " . $connection->error;
     }
 }
 
-$conn->close();
+$connection->close();
 
 // Rediriger vers la page cart.php
 header("Location: cart.php");

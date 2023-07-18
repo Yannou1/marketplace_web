@@ -103,7 +103,7 @@ function showCategory(category) {
 
 function deleteItem(itemId) {
       // Demander une confirmation avant de supprimer l'item
-      if (confirm("Voulez-vous vraiment supprimer cet item ?")) {
+      if (confirm("Are you sure you want to delete this item?")) {
         // Effectuer la suppression de l'item en utilisant une requête AJAX
         var xhr = new XMLHttpRequest();
         xhr.open("POST", "delete_item.php", true);
@@ -111,7 +111,7 @@ function deleteItem(itemId) {
         xhr.onreadystatechange = function () {
           if (xhr.readyState === 4 && xhr.status === 200) {
             // Afficher une confirmation de suppression
-            alert("L'item a été supprimé avec succès.");
+            alert("The item has been successfully deleted.");
 
             // Actualiser la page pour afficher les changements
             location.reload();
@@ -120,9 +120,6 @@ function deleteItem(itemId) {
         xhr.send("item_id=" + itemId);
       }
     }
-
-
-    
   function showtype(type) {
   console.log(type)
   // Envoyer une requête AJAX pour obtenir les produits de la catégorie depuis le serveur
@@ -179,3 +176,57 @@ function resetFieldsValidity(container) {
     field.setCustomValidity('');
   });
 }
+document.addEventListener('DOMContentLoaded', function() {
+            var sellerDiv = document.getElementById('seller-<?php echo $sellerId; ?>');
+            var editLink = sellerDiv.querySelector('.edit-link');
+
+            sellerDiv.addEventListener('mouseover', function() {
+                editLink.style.display = 'block';
+            });
+
+            sellerDiv.addEventListener('mouseout', function() {
+                editLink.style.display = 'none';
+            });
+        });
+function acceptOffer(offerId) {
+  // Change the status of the offer to "accepted".
+  $.ajax({
+    url: "/offers/" + offerId + "/accept",
+    type: "POST",
+    success: function() {
+      // Update the table to reflect the change in status.
+      var offerRow = $("#offer-" + offerId);
+      offerRow.find(".status").text("Accepté");
+    }
+  });
+}
+
+function rejectOffer(offerId) {
+  // Change the status of the offer to "rejected".
+  $.ajax({
+    url: "/offers/" + offerId + "/reject",
+    type: "POST",
+    success: function() {
+      // Update the table to reflect the change in status.
+      var offerRow = $("#offer-" + offerId);
+      offerRow.find(".status").text("Rejeté");
+    }
+  });
+}
+
+function counterOffer(offerId) {
+  // Create a new offer with the same item, same seller, but a different price.
+  $.ajax({
+    url: "/offers/" + offerId + "/counter",
+    type: "POST",
+    success: function(newOfferId) {
+      // Update the table to reflect the new offer.
+      var newOfferRow = $("#offer-" + newOfferId);
+      newOfferRow.find(".price").text(newOffer.price);
+      newOfferRow.find(".status").text("En attente");
+      newOfferRow.find(".seller").text(newOffer.seller);
+      newOfferRow.find(".receiver").text(newOffer.receiver);
+    }
+  });
+}
+

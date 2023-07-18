@@ -1,17 +1,6 @@
 <?php
-session_start();
 include 'session.php';
-
-// Connexion à la base de données
-$servername = "localhost";
-$username = "root";
-$password = "root";
-$dbname = "infinitydb";
-
-$conn = new mysqli($servername, $username, $password, $dbname);
-if ($conn->connect_error) {
-  die("Connexion échouée : " . $conn->connect_error);
-}
+include 'db_connect.php';
 
 // Vérifier si l'utilisateur est connecté
 if (isset($_SESSION['user_id'])) {
@@ -38,11 +27,11 @@ if (isset($_SESSION['user_id'])) {
       $photoContent = file_get_contents($photo['tmp_name']);
 
       // S'échapper pour l'insertion dans la requête SQL
-      $escapedPhotoContent = $conn->real_escape_string($photoContent);
+      $escapedPhotoContent = $connection->real_escape_string($photoContent);
 
       // Récupérer l'ID de catégorie correspondant au nom de catégorie
       $sql_category = "SELECT category_id FROM category WHERE name = '$category_name'";
-      $result_category = $conn->query($sql_category);
+      $result_category = $connection->query($sql_category);
 
       if ($result_category->num_rows > 0) {
         $row_category = $result_category->fetch_assoc();
@@ -63,10 +52,10 @@ if (isset($_SESSION['user_id'])) {
       }
 
       // Exécuter la requête SQL
-      if ($conn->query($sql) === TRUE) {
+      if ($connection->query($sql) === TRUE) {
         // L'article a été ajouté avec succès
         echo "L'article a été ajouté avec succès.";
-        $item_id = $conn->insert_id;
+        $item_id = $connection->insert_id;
         
         if (isset($_POST['sale_type']) && $_POST['sale_type'] == 'auction') {
           $start_date = $_POST['start_date'];
@@ -76,15 +65,15 @@ if (isset($_SESSION['user_id'])) {
           $sql_auction = "INSERT INTO auction (item_id, start_date, end_date, seller_id, minimum_bid) VALUES ('$item_id', '$start_date', '$end_date','$user_id', '$minimum_bid')";
           
           // Exécuter la requête
-          if ($conn->query($sql_auction) === TRUE) {
+          if ($connection->query($sql_auction) === TRUE) {
             echo "L'enchère a été ajoutée avec succès.";
           } else {
-            echo "Erreur : Impossible d'ajouter l'enchère." . $conn->error;
+            echo "Erreur : Impossible d'ajouter l'enchère." . $connection->error;
           }
         }
       } else {
         // Une erreur s'est produite lors de l'ajout de l'article
-        echo "Erreur : Impossible d'ajouter l'article." . $conn->error;
+        echo "Erreur : Impossible d'ajouter l'article." . $connection->error;
       }
     } else {
       // La photo n'a pas été téléchargée
@@ -94,8 +83,7 @@ if (isset($_SESSION['user_id'])) {
 }
 
 // Fermer la connexion à la base de données
-$conn->close();
-
+$connection->close();
 // Rediriger vers la page cart.php
 header("Location: sell.php");
 exit;
